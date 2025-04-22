@@ -117,4 +117,38 @@ public class OpenGLWrapper {
     public static void hideWindow(long pWindowId){
         glfwHideWindow(pWindowId);
     }
+//////////////////////////////////////////////////////////////////////////////////////////////////VAO
+    public static int genVAO(){
+        return GL33.glGenVertexArrays();
+    }
+    public static void bindVAO(int pVaoID){
+        GL33.glBindVertexArray(pVaoID);
+    }
+    public static void unbindVAO(){
+        GL33.glBindVertexArray(0);
+    }
+//////////////////////////////////////////////////////////////////////////////////////////////////VBO
+    public static int genVBO(){
+        return GL33.glGenBuffers();
+    }
+    public static void bindVBO(int pVboID){
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, pVboID);
+    }
+    public static void unbindVBO(){
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
+    }
+    public static void uploadToVBO(FloatBuffer pVertexBuffer){
+        GL33.glBufferData(GL33.GL_ARRAY_BUFFER, pVertexBuffer, GL33.GL_STATIC_DRAW);//todo draw param
+    }
+
+    //todo ka wie man das nennt
+    public static void assignVToV(int pIndex, int pSize, boolean pNormalize, int pStride, int pOffset){
+        GL33.glVertexAttribPointer(pIndex, pSize, GL33.GL_FLOAT, pNormalize, pStride * Float.BYTES, (long) pOffset * Float.BYTES);
+    }
+    public static void enableVToV(int pIndex){
+        GL33.glEnableVertexAttribArray(pIndex);
+    }
+    public static void disableVToV(int pIndex){
+        GL33.glDisableVertexAttribArray(pIndex);
+    }
 }
