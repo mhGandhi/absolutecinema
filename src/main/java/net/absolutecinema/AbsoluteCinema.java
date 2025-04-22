@@ -17,7 +17,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 import static net.absolutecinema.rendering.GraphicsWrapper.initGLFW;
 import static org.lwjgl.glfw.GLFW.*;
@@ -36,7 +35,7 @@ public class AbsoluteCinema {
     Uni<Matrix4f> projection;
     Uni<Matrix4f> model;
     Uni<Vector3f> cameraPos;
-    BufferWrapper cube;
+    BufferWrapper objModel;
 
     Camera cam;
     double lastX = Double.MAX_VALUE;
@@ -161,13 +160,13 @@ public class AbsoluteCinema {
             cameraPos.set(cam.getPos());
         }
 
-        cube = new BufferWrapper(6);
-        float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("cube.obj"));
+        objModel = new BufferWrapper(6);
+        float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("models/mountains.obj"));
         FloatBuffer vertexBuffer = MemoryUtil.memAllocFloat(cubeVts.length);
         vertexBuffer.put(cubeVts).flip();
-        cube.uploadToVBO(vertexBuffer);
-        cube.addVToV(3,false,0);
-        cube.addVToV(3,true,3);
+        objModel.uploadToVBO(vertexBuffer);
+        objModel.addVToV(3,false,0);
+        objModel.addVToV(3,true,3);
     }
 
     private long frameCount = 0;
@@ -181,8 +180,8 @@ public class AbsoluteCinema {
 
         view.set(cam.getViewMatrix());
         cameraPos.set(cam.getPos());
-        cube.bindVAO();
-        cube.draw();
+        objModel.bindVAO();
+        objModel.draw();
 
 
         window.swapBuffers();
