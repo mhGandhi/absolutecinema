@@ -10,6 +10,7 @@ import net.absolutecinema.rendering.shader.ShaderType;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -36,6 +37,8 @@ public class AbsoluteCinema {
     BufferWrapper cube;
 
     Camera cam;
+    double lastX = Double.MAX_VALUE;
+    double lastY = Double.MAX_VALUE;
 
     public AbsoluteCinema(final GameConfig pConfig){
         instance = this;
@@ -61,7 +64,7 @@ public class AbsoluteCinema {
         GLFWErrorCallback.createPrint(System.err).set();//todo to LOGGER
         initGLFW();
 
-        glfwDefaultWindowHints();
+        glfwDefaultWindowHints();//todo hide that shi
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
@@ -70,6 +73,59 @@ public class AbsoluteCinema {
         GraphicsWrapper.createCapabilities();
         this.window.show();
         this.window.enableVsync();
+
+        //CALLBACKS todo remove
+        {
+            GLFWKeyCallback keyCallback = glfwSetKeyCallback(window.id, (window, key, scancode, action, mods) -> {
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+                    glfwSetWindowShouldClose(window, true);
+                if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                    if (key == GLFW_KEY_W) cam.moveForward(0.1f);
+                    if (key == GLFW_KEY_S) cam.moveForward(-0.1f);
+                    if (key == GLFW_KEY_A) cam.moveRight(-0.1f);
+                    if (key == GLFW_KEY_D) cam.moveRight(0.1f);
+                    if (key == GLFW_KEY_SPACE) cam.moveUp(0.1f);
+                    if (key == GLFW_KEY_LEFT_CONTROL) cam.moveUp(-0.1f);
+                }
+            });
+
+
+            //glfwSetInputMode(testWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            //glfwSetInputMode(testWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(window.id, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+            glfwSetCursorPosCallback(window.id, (window, xpos, ypos) -> {
+                if (lastX == Double.MAX_VALUE || lastY == Double.MAX_VALUE) {
+                    lastX = xpos;
+                    lastY = ypos;
+                }
+                float deltaX = (float) (xpos - lastX);
+                float deltaY = (float) (ypos - lastY);
+
+                cam.yaw(-deltaX);
+                cam.pitch(deltaY);
+
+                lastX = xpos;
+                lastY = ypos;
+            });
+
+            glfwSetWindowFocusCallback(window.id, (window, focused) -> {
+                if (!focused) {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    lastX = Double.MAX_VALUE;
+                    lastY = Double.MAX_VALUE;
+                }
+            });
+
+            glfwSetMouseButtonCallback(window.id, (window, button, action, mods) -> {
+                if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                }
+            });
+            glfwSetFramebufferSizeCallback(window.id, (window, width, height) -> {
+                if (width == 0 || height == 0) return;
+                glViewport(0, 0, width, height);
+            });
+        }
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
