@@ -28,6 +28,9 @@ public class OpenGLWrapper {
             throw new ShaderCompilationException("Shader failed to compile.");
         }
     }
+    public static void deleteShader(int pShaderId){
+        GL33.glDeleteShader(pShaderId);
+    }
     public static int shaderTypeToInt(ShaderType pType){
         switch (pType){
             case VERTEX -> {

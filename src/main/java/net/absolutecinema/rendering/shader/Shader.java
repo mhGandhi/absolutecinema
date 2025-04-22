@@ -1,7 +1,6 @@
 package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.OpenGLWrapper;
-import org.lwjgl.opengl.GL33;
 
 public class Shader {
     public final int id;
@@ -20,5 +19,9 @@ public class Shader {
 
     private void compile(){
         OpenGLWrapper.compileShader(this.id);
+    }
+
+    public void delete(){
+        OpenGLWrapper.deleteShader(this.id);
     }
 }
