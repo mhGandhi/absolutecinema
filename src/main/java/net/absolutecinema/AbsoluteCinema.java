@@ -9,6 +9,7 @@ import net.absolutecinema.rendering.shader.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.system.MemoryUtil;
@@ -34,6 +35,7 @@ public class AbsoluteCinema {
     Uni<Matrix4f> view;
     Uni<Matrix4f> projection;
     Uni<Matrix4f> model;
+    Uni<Vector3f> cameraPos;
     BufferWrapper cube;
 
     Camera cam;
@@ -148,6 +150,7 @@ public class AbsoluteCinema {
             view = new Uni<>(shaderProgram, "view");
             projection = new Uni<>(shaderProgram, "projection");
             model = new Uni<>(shaderProgram, "model");
+            cameraPos = new Uni<>(shaderProgram, "cameraPos");
 
             cam = new Camera();
             //cam.setX(10);
@@ -155,6 +158,7 @@ public class AbsoluteCinema {
             view.set(cam.getViewMatrix());
             projection.set(cam.getProjectionMatrix((float) Math.toRadians(90.0f), ((float) 800 / (float) 600), 0.1f, 100.0f));
             model.set(new Matrix4f().identity());
+            cameraPos.set(cam.getPos());
         }
 
         cube = new BufferWrapper(6);
@@ -176,6 +180,7 @@ public class AbsoluteCinema {
         }
 
         view.set(cam.getViewMatrix());
+        cameraPos.set(cam.getPos());
         cube.bindVAO();
         cube.draw();
 
