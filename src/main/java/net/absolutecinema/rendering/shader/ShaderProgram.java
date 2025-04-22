@@ -49,4 +49,8 @@ public class ShaderProgram {
     public void use(){
         OpenGLWrapper.useProgram(this.id);
     }
+
+    public void delete(){
+        OpenGLWrapper.deleteProgram(this.id);
+    }
 }

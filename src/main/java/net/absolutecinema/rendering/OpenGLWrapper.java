@@ -69,6 +69,9 @@ public class OpenGLWrapper {
     public static void useProgram(int pProgramId){
         GL33.glUseProgram(pProgramId);
     }
+    public static void deleteProgram(int pProgramId){
+        GL33.glDeleteProgram(pProgramId);
+    }
 
     public static int getUniformLocation(int pProgramId, CharSequence pName){
         return GL33.glGetUniformLocation(pProgramId, pName);
