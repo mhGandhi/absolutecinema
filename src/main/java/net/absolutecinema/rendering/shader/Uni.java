@@ -1,16 +1,15 @@
 package net.absolutecinema.rendering.shader;
 
+import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.OpenGLWrapper;
 
-public class Uni<T> {
-    public final int location;
-
+public class Uni<T> extends GLObject {
     public Uni(ShaderProgram pProgram, CharSequence pName){
-        this.location = OpenGLWrapper.getUniformLocation(pProgram.id, pName);
+        super(OpenGLWrapper.getUniformLocation(pProgram.id, pName));
     }
 
     public void set(T pVal){
-        OpenGLWrapper.putUniformValue(this.location, pVal);
+        OpenGLWrapper.putUniformValue(this.id, pVal);
     }
 
 }

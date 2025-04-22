@@ -1,15 +1,15 @@
 package net.absolutecinema.rendering.shader;
 
+import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.OpenGLWrapper;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
-public class ShaderProgram {
-    public final int id;
+public class ShaderProgram extends GLObject {
     private boolean linked;
 
     public ShaderProgram(){
-        this.id = OpenGLWrapper.createProgram();
+        super(OpenGLWrapper.createProgram());
         linked = false;
     }
 

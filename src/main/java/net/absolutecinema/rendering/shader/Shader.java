@@ -1,14 +1,14 @@
 package net.absolutecinema.rendering.shader;
 
+import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.OpenGLWrapper;
 
-public class Shader {
-    public final int id;
+public class Shader extends GLObject {
     public final ShaderType type;
 
     public Shader(ShaderType pShaderType, String pSourceCode){
+        super(OpenGLWrapper.createShader(pShaderType));
         this.type = pShaderType;
-        this.id = OpenGLWrapper.createShader(this.type);
         upload(pSourceCode);
         compile();
     }
