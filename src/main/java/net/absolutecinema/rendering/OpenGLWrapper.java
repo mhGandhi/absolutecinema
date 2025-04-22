@@ -5,14 +5,18 @@ import net.absolutecinema.rendering.shader.ShaderCompilationException;
 import net.absolutecinema.rendering.shader.ShaderType;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL33;
 
 
 import java.nio.FloatBuffer;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLWrapper {
+//////////////////////////////////////////////////////////////////////////////////////////////////SHADER
     public static int createShader(ShaderType pShaderType){
         int type = shaderTypeToInt(pShaderType);
         return GL33.glCreateShader(type);
@@ -44,7 +48,7 @@ public class OpenGLWrapper {
             }
         }
     }
-
+//////////////////////////////////////////////////////////////////////////////////////////////////PROGRAM
     public static int createProgram(){
         return GL33.glCreateProgram();
     }
@@ -83,5 +87,31 @@ public class OpenGLWrapper {
             GL33.glUniform3f(pLocation, v3f.x, v3f.y, v3f.z);
             return;
         }
+    }
+//////////////////////////////////////////////////////////////////////////////////////////////////WINDOW
+    public static boolean initGLFW(){
+        return glfwInit();
+    }
+    public static long createWindow(int pWidth, int pHeight, String pTitle, long pMonitor, long pShare) {
+        long id = glfwCreateWindow(pWidth, pHeight, pTitle, pMonitor, pShare);
+        if (id == NULL)
+            throw new RuntimeException("Failed to create GLFW window");
+        return id;
+    }
+    public static void makeWinContextCurrent(long pId){
+        glfwMakeContextCurrent(pId);
+    }
+    public static void createCapabilities(){
+        GL.createCapabilities();
+    }
+    //todo make vsync directly
+    public static void swapInterval(int pIv){
+        glfwSwapInterval(pIv);
+    }
+    public static void showWindow(long pWindowId){
+        glfwShowWindow(pWindowId);
+    }
+    public static void hideWindow(long pWindowId){
+        glfwHideWindow(pWindowId);
     }
 }
