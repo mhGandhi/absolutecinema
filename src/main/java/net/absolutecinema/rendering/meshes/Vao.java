@@ -3,6 +3,8 @@ package net.absolutecinema.rendering.meshes;
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
 
+import static net.absolutecinema.AbsoluteCinema.LOGGER;
+
 public class Vao extends GLObject {
 
     public Vao() {
@@ -10,6 +12,10 @@ public class Vao extends GLObject {
     }
 
     public void bind(){
-        GraphicsWrapper.bindVAO(this.id);
+        if(GraphicsWrapper.getBoundVAO()!=this.id) {
+            GraphicsWrapper.bindVAO(this.id);
+        }else{
+            LOGGER.info("VAO "+this.id+" already bound");
+        }
     }
 }
