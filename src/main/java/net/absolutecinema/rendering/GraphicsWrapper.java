@@ -127,6 +127,9 @@ public class GraphicsWrapper {
     public static void hideWindow(long pWindowId){
         glfwHideWindow(pWindowId);
     }
+    public static void swapBuffers(long pWindowId){
+        glfwSwapBuffers(pWindowId);
+    }
 //////////////////////////////////////////////////////////////////////////////////////////////////VAO
     public static int genVAO(){
         return GL33.glGenVertexArrays();
@@ -164,5 +167,10 @@ public class GraphicsWrapper {
     }
     public static void disableVToV(int pIndex){
         GL33.glDisableVertexAttribArray(pIndex);
+    }
+
+
+    public static void drawTriangles(int pCount){
+        GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, pCount);
     }
 }

@@ -26,4 +26,8 @@ public class Window {
     public boolean shouldClose(){
         return glfwWindowShouldClose(this.id);
     }
+
+    public void swapBuffers() {
+        GraphicsWrapper.swapBuffers(this.id);
+    }
 }
