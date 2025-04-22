@@ -14,8 +14,8 @@ public class Vbo extends GLObject {
     public void bind(){
         if(GraphicsWrapper.getBoundVBO()!=this.id) {
             GraphicsWrapper.bindVBO(this.id);
-        }else{
-            LOGGER.info("VBO "+this.id+" already bound");
-        }
+        }//else{
+            //LOGGER.info("VBO "+this.id+" already bound");
+        //}
     }
 }

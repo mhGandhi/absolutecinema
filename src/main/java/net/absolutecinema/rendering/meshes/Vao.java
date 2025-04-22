@@ -14,8 +14,8 @@ public class Vao extends GLObject {
     public void bind(){
         if(GraphicsWrapper.getBoundVAO()!=this.id) {
             GraphicsWrapper.bindVAO(this.id);
-        }else{
-            LOGGER.info("VAO "+this.id+" already bound");
-        }
+        }//else{
+            //LOGGER.info("VAO "+this.id+" already bound");
+        //}
     }
 }
