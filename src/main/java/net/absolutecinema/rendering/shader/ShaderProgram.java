@@ -2,9 +2,6 @@ package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.OpenGLWrapper;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
 public class ShaderProgram {
@@ -14,6 +11,10 @@ public class ShaderProgram {
     public ShaderProgram(){
         this.id = OpenGLWrapper.createProgram();
         linked = false;
+    }
+
+    public Uni<?> getUni(CharSequence pName){
+        return new Uni<>(this, pName);
     }
 
     public void attach(Shader pShader){

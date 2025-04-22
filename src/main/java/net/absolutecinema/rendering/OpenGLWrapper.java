@@ -3,8 +3,12 @@ package net.absolutecinema.rendering;
 import net.absolutecinema.rendering.shader.ProgramLinkingException;
 import net.absolutecinema.rendering.shader.ShaderCompilationException;
 import net.absolutecinema.rendering.shader.ShaderType;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL33;
 
+
+import java.nio.FloatBuffer;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
@@ -53,6 +57,25 @@ public class OpenGLWrapper {
             String log = GL33.glGetProgramInfoLog(pProgramId);
             LOGGER.err("Shader Program Linking Failed:\n" + log);
             throw new ProgramLinkingException("Shader program failed to link.");
+        }
+    }
+
+    public static int getUniformLocation(int pProgramId, CharSequence pName){
+        return GL33.glGetUniformLocation(pProgramId, pName);
+    }
+    //doesn't assure type safety
+    public static void putUniformValue(int pLocation, Object pValue){
+        if(pValue instanceof Matrix4f m4f){
+            GL33.glUniformMatrix4fv(pLocation, false, m4f.get(new float[16]));
+            return;
+        }
+        if(pValue instanceof Float f){
+            GL33.glUniform1f(pLocation, f);
+            return;
+        }
+        if(pValue instanceof Vector3f v3f){
+            GL33.glUniform3f(pLocation, v3f.x, v3f.y, v3f.z);
+            return;
         }
     }
 }
