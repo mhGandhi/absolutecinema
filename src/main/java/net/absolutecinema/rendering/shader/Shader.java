@@ -10,8 +10,12 @@ public class Shader {
     public Shader(ShaderType pShaderType, String pSourceCode){
         this.type = pShaderType;
         this.id = OpenGLWrapper.createShader(this.type);
-        OpenGLWrapper.uploadSourceToShader(this.id, pSourceCode);
+        upload(pSourceCode);
         compile();
+    }
+
+    private void upload(String pSourceCode){
+        OpenGLWrapper.uploadSourceToShader(this.id, pSourceCode);
     }
 
     private void compile(){
