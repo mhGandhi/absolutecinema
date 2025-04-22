@@ -59,6 +59,9 @@ public class OpenGLWrapper {
             throw new ProgramLinkingException("Shader program failed to link.");
         }
     }
+    public static void useProgram(int pProgramId){
+        GL33.glUseProgram(pProgramId);
+    }
 
     public static int getUniformLocation(int pProgramId, CharSequence pName){
         return GL33.glGetUniformLocation(pProgramId, pName);

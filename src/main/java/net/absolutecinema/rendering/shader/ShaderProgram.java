@@ -45,4 +45,8 @@ public class ShaderProgram {
     public boolean getLinked(){
         return this.linked;
     }
+
+    public void use(){
+        OpenGLWrapper.useProgram(this.id);
+    }
 }
