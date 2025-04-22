@@ -16,7 +16,17 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GraphicsWrapper {
-//////////////////////////////////////////////////////////////////////////////////////////////////SHADER
+    private static int boundVBO;
+    private static int boundVAO;
+
+    public static int getBoundVAO() {
+        return boundVAO;
+    }
+    public static int getBoundVBO(){
+        return boundVBO;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////SHADER
     public static int createShader(ShaderType pShaderType){
         int type = shaderTypeToInt(pShaderType);
         return GL33.glCreateShader(type);
@@ -123,9 +133,11 @@ public class GraphicsWrapper {
     }
     public static void bindVAO(int pVaoID){
         GL33.glBindVertexArray(pVaoID);
+        boundVAO = pVaoID;
     }
     public static void unbindVAO(){
         GL33.glBindVertexArray(0);
+        boundVAO = 0;
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////VBO
     public static int genVBO(){
@@ -133,9 +145,11 @@ public class GraphicsWrapper {
     }
     public static void bindVBO(int pVboID){
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, pVboID);
+        boundVBO = pVboID;
     }
     public static void unbindVBO(){
         GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0);
+        boundVBO = 0;
     }
     public static void uploadToVBO(FloatBuffer pVertexBuffer){
         GL33.glBufferData(GL33.GL_ARRAY_BUFFER, pVertexBuffer, GL33.GL_STATIC_DRAW);//todo draw param
