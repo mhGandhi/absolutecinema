@@ -2,15 +2,16 @@ package net.absolutecinema;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Util {
-    public static float[] trisFromObj(String pPath) {
+    public static float[] trisFromObj(Path pPath) {
         List<Float> faces = new ArrayList<>();
         try {
-            List<String> lines = Files.readAllLines(Paths.get(pPath));
+            List<String> lines = Files.readAllLines(pPath);
             List<float[]> points = new ArrayList<>();
             List<float[]> normals = new ArrayList<>(); // For storing normals
 
