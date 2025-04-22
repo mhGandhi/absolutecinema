@@ -1,5 +1,6 @@
 package net.absolutecinema.rendering;
 
+import net.absolutecinema.rendering.shader.ProgramLinkingException;
 import net.absolutecinema.rendering.shader.ShaderCompilationException;
 import net.absolutecinema.rendering.shader.ShaderType;
 import org.lwjgl.opengl.GL33;
@@ -12,11 +13,9 @@ public class OpenGLWrapper {
         int type = shaderTypeToInt(pShaderType);
         return GL33.glCreateShader(type);
     }
-
     public static void uploadSourceToShader(int pShaderId, String pSource){
         GL33.glShaderSource(pShaderId, pSource);
     }
-
     public static void compileShader(int pShaderId) throws ShaderCompilationException{
         GL33.glCompileShader(pShaderId);
         if (GL33.glGetShaderi(pShaderId, GL33.GL_COMPILE_STATUS) == GL33.GL_FALSE) {
@@ -25,7 +24,6 @@ public class OpenGLWrapper {
             throw new ShaderCompilationException("Shader failed to compile.");
         }
     }
-
     public static int shaderTypeToInt(ShaderType pType){
         switch (pType){
             case VERTEX -> {
@@ -37,6 +35,24 @@ public class OpenGLWrapper {
             default -> {
                 return -1;//todo exceptions
             }
+        }
+    }
+
+    public static int createProgram(){
+        return GL33.glCreateProgram();
+    }
+    public static void attachShader(int pProgramId, int pShaderId){
+        GL33.glAttachShader(pProgramId, pShaderId);
+    }
+    public static void detachShader(int pProgramId, int pShaderId){
+        GL33.glDetachShader(pProgramId, pShaderId);
+    }
+    public static void linkProgram(int pProgramId) throws ProgramLinkingException {
+        GL33.glLinkProgram(pProgramId);
+        if (GL33.glGetProgrami(pProgramId, GL33.GL_LINK_STATUS) == GL33.GL_FALSE) {
+            String log = GL33.glGetProgramInfoLog(pProgramId);
+            LOGGER.err("Shader Program Linking Failed:\n" + log);
+            throw new ProgramLinkingException("Shader program failed to link.");
         }
     }
 }
