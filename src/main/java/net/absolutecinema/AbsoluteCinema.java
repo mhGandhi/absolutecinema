@@ -1,6 +1,6 @@
 package net.absolutecinema;
 
-import net.absolutecinema.rendering.OpenGLWrapper;
+import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.Window;
 import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.ShaderProgram;
@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static net.absolutecinema.rendering.OpenGLWrapper.initGLFW;
+import static net.absolutecinema.rendering.GraphicsWrapper.initGLFW;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -53,7 +53,7 @@ public class AbsoluteCinema {
 
         this.window = new Window();
         this.window.select();
-        OpenGLWrapper.createCapabilities();
+        GraphicsWrapper.createCapabilities();
         this.window.show();
         this.window.enableVsync();
 

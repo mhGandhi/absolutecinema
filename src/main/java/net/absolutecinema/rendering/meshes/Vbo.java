@@ -1,15 +1,15 @@
 package net.absolutecinema.rendering.meshes;
 
 import net.absolutecinema.rendering.GLObject;
-import net.absolutecinema.rendering.OpenGLWrapper;
+import net.absolutecinema.rendering.GraphicsWrapper;
 
 public class Vbo extends GLObject {
 
     public Vbo() {
-        super(OpenGLWrapper.genVBO());
+        super(GraphicsWrapper.genVBO());
     }
 
     public void bind(){
-        OpenGLWrapper.bindVBO(this.id);
+        GraphicsWrapper.bindVBO(this.id);
     }
 }

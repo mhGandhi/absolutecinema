@@ -1,27 +1,27 @@
 package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.GLObject;
-import net.absolutecinema.rendering.OpenGLWrapper;
+import net.absolutecinema.rendering.GraphicsWrapper;
 
 public class Shader extends GLObject {
     public final ShaderType type;
 
     public Shader(ShaderType pShaderType, String pSourceCode){
-        super(OpenGLWrapper.createShader(pShaderType));
+        super(GraphicsWrapper.createShader(pShaderType));
         this.type = pShaderType;
         upload(pSourceCode);
         compile();
     }
 
     private void upload(String pSourceCode){
-        OpenGLWrapper.uploadSourceToShader(this.id, pSourceCode);
+        GraphicsWrapper.uploadSourceToShader(this.id, pSourceCode);
     }
 
     private void compile(){
-        OpenGLWrapper.compileShader(this.id);
+        GraphicsWrapper.compileShader(this.id);
     }
 
     public void delete(){
-        OpenGLWrapper.deleteShader(this.id);
+        GraphicsWrapper.deleteShader(this.id);
     }
 }

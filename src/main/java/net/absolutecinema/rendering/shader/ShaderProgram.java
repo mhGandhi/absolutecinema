@@ -1,7 +1,7 @@
 package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.GLObject;
-import net.absolutecinema.rendering.OpenGLWrapper;
+import net.absolutecinema.rendering.GraphicsWrapper;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
@@ -9,7 +9,7 @@ public class ShaderProgram extends GLObject {
     private boolean linked;
 
     public ShaderProgram(){
-        super(OpenGLWrapper.createProgram());
+        super(GraphicsWrapper.createProgram());
         linked = false;
     }
 
@@ -26,7 +26,7 @@ public class ShaderProgram extends GLObject {
         //}else{
         //    shaders.add(pShader);
         //}
-        OpenGLWrapper.attachShader(this.id, pShader.id);
+        GraphicsWrapper.attachShader(this.id, pShader.id);
     }
 
     public void link(){
@@ -34,7 +34,7 @@ public class ShaderProgram extends GLObject {
         //    OpenGLWrapper.attachShader(this.id, shader.id);
         //}
         try{
-            OpenGLWrapper.linkProgram(this.id);
+            GraphicsWrapper.linkProgram(this.id);
         }catch(ProgramLinkingException e){
             LOGGER.err(e.getMessage());
             return;
@@ -47,10 +47,10 @@ public class ShaderProgram extends GLObject {
     }
 
     public void use(){
-        OpenGLWrapper.useProgram(this.id);
+        GraphicsWrapper.useProgram(this.id);
     }
 
     public void delete(){
-        OpenGLWrapper.deleteProgram(this.id);
+        GraphicsWrapper.deleteProgram(this.id);
     }
 }

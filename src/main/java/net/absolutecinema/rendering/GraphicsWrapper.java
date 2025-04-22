@@ -15,7 +15,7 @@ import static net.absolutecinema.AbsoluteCinema.LOGGER;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class OpenGLWrapper {
+public class GraphicsWrapper {
 //////////////////////////////////////////////////////////////////////////////////////////////////SHADER
     public static int createShader(ShaderType pShaderType){
         int type = shaderTypeToInt(pShaderType);
