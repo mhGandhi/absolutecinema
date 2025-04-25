@@ -30,4 +30,8 @@ public class Window {
     public void swapBuffers() {
         GraphicsWrapper.swapBuffers(this.id);
     }
+
+    public void setTitle(String pTitle){
+        GraphicsWrapper.setWindowTitle(this.id, pTitle);
+    }
 }

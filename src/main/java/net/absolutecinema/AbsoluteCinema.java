@@ -56,8 +56,20 @@ public class AbsoluteCinema {
         final long startTime = System.currentTimeMillis();
 
         init();
+
+        int frames = 0;
+        double timer = glfwGetTime();
+
         while(this.running){
             frame();
+
+            double currentTime = glfwGetTime();
+            frames++;
+            if (currentTime - timer >= 1.0) {
+                window.setTitle("ABS CIN - "+frames+" fps");
+                frames = 0;
+                timer += 1.0;
+            }
         }
     }
 
@@ -73,7 +85,7 @@ public class AbsoluteCinema {
         this.window.select();
         GraphicsWrapper.createCapabilities();
         this.window.show();
-        this.window.enableVsync();
+        //this.window.enableVsync();
 
         //CALLBACKS todo remove
         {

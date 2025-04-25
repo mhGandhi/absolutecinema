@@ -130,6 +130,9 @@ public class GraphicsWrapper {
     public static void swapBuffers(long pWindowId){
         glfwSwapBuffers(pWindowId);
     }
+    public static void setWindowTitle(long pWindowId, String pTitle){
+        glfwSetWindowTitle(pWindowId, pTitle);
+    }
 //////////////////////////////////////////////////////////////////////////////////////////////////VAO
     public static int genVAO(){
         return GL33.glGenVertexArrays();

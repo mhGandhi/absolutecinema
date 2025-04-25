@@ -13,5 +13,8 @@ public class Main {
     }
     /*todo
     LOGGER
+    MESH (DIFFERENT KINDS)
+    MORE SOLID VToV fields
+    (TEXTURE)
     */
 }
