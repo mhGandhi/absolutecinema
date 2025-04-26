@@ -177,8 +177,8 @@ public class AbsoluteCinema {
         FloatBuffer vertexBuffer = MemoryUtil.memAllocFloat(cubeVts.length);
         vertexBuffer.put(cubeVts).flip();
         objModel.uploadToVBO(vertexBuffer);
-        objModel.addVToV(3,false,0);
-        objModel.addVToV(3,true,3);
+        objModel.addVToV(3,false);
+        objModel.addVToV(3,true);
     }
 
     private long frameCount = 0;

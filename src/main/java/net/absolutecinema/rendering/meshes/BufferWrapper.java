@@ -4,11 +4,14 @@ import net.absolutecinema.rendering.GraphicsWrapper;
 
 import java.nio.FloatBuffer;
 
+import static net.absolutecinema.AbsoluteCinema.LOGGER;
+
 public class BufferWrapper {
-    private Vao vao;
-    private Vbo vbo;
+    private final Vao vao;
+    private final Vbo vbo;
     private int lastIndex;
-    private int stride;
+    private int lastOffset;
+    private final int stride;
     private int vertCount;
 
     public BufferWrapper(int pStride){
@@ -16,6 +19,7 @@ public class BufferWrapper {
         vbo = new Vbo();
         lastIndex = -1;
         vertCount = 0;
+        lastOffset = 0;
 
         this.stride = pStride;
     }
@@ -28,11 +32,18 @@ public class BufferWrapper {
         //MemoryUtil.memFree(pBuffer);
     }
 
-    public void addVToV(int pSize, boolean pNormalize, int pOffset){
+    public void addVToV(int pSize, boolean pNormalize){
+        if(lastOffset==this.stride){
+            LOGGER.err("Stride of "+this.stride+" already satisfied");
+        } else if (lastOffset+pSize>this.stride) {
+            LOGGER.err("Assignment of size "+pSize+" won't fit into stride of "+this.stride+" by "+(lastOffset+pSize-this.stride));
+        }
+
         vao.bind();
         vbo.bind();
         lastIndex++;
-        GraphicsWrapper.assignVToV(lastIndex, pSize, pNormalize, this.stride, pOffset);
+        GraphicsWrapper.assignVToV(lastIndex, pSize, pNormalize, this.stride, lastOffset);
+        lastOffset+=pSize;
         GraphicsWrapper.enableVToV(lastIndex);
     }
 
