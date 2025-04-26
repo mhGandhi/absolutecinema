@@ -14,14 +14,14 @@ public class BufferWrapper {
     private final int stride;
     private int vertCount;
 
-    public BufferWrapper(int pStride){
+    public BufferWrapper(int pFieldsSize){
         vao = new Vao();
         vbo = new Vbo();
         lastIndex = -1;
         vertCount = 0;
         lastOffset = 0;
 
-        this.stride = pStride;
+        this.stride = pFieldsSize;
     }
 
     public void uploadToVBO(FloatBuffer pBuffer){
@@ -32,11 +32,13 @@ public class BufferWrapper {
         //MemoryUtil.memFree(pBuffer);
     }
 
-    public void addVToV(int pSize, boolean pNormalize){
+    public void addField(int pSize, boolean pNormalize){
         if(lastOffset==this.stride){
-            LOGGER.err("Stride of "+this.stride+" already satisfied");
+            LOGGER.warn("Fields already full ("+stride+"/"+stride+") - returning");
+            return;
         } else if (lastOffset+pSize>this.stride) {
-            LOGGER.err("Assignment of size "+pSize+" won't fit into stride of "+this.stride+" by "+(lastOffset+pSize-this.stride));
+            LOGGER.err("Field of size "+pSize+" would overload field capacity "+this.stride+" by "+(lastOffset+pSize-this.stride)+" - returning");
+            return;
         }
 
         vao.bind();

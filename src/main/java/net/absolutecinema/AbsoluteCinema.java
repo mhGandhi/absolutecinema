@@ -31,6 +31,8 @@ public class AbsoluteCinema {
 
     private final GameConfig config;
 
+    private final Runtime runtime;
+
     Uni<Matrix4f> view;
     Uni<Matrix4f> projection;
     Uni<Matrix4f> model;
@@ -49,6 +51,7 @@ public class AbsoluteCinema {
         this.window = null;
 
         config = pConfig;
+        runtime = Runtime.getRuntime();
     }
 
     public void run(){
@@ -66,7 +69,11 @@ public class AbsoluteCinema {
             double currentTime = glfwGetTime();
             frames++;
             if (currentTime - timer >= 1.0) {
-                window.setTitle("ABS CIN - "+frames+" fps");
+                long totalMemory = runtime.totalMemory();
+                long freeMemory = runtime.freeMemory();
+                long usedMemory = totalMemory - freeMemory;
+
+                window.setTitle("ABSOLUTE CINEMA - "+frames+" fps - "+usedMemory/(1024*1024)+"/"+totalMemory/(1024*1024)+" MB");
                 frames = 0;
                 timer += 1.0;
             }
@@ -177,8 +184,8 @@ public class AbsoluteCinema {
         FloatBuffer vertexBuffer = MemoryUtil.memAllocFloat(cubeVts.length);
         vertexBuffer.put(cubeVts).flip();
         objModel.uploadToVBO(vertexBuffer);
-        objModel.addVToV(3,false);
-        objModel.addVToV(3,true);
+        objModel.addField(3,false);
+        objModel.addField(3,true);
     }
 
     private long frameCount = 0;
