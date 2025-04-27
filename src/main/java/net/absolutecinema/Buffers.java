@@ -5,6 +5,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Buffers {
@@ -30,6 +31,17 @@ public class Buffers {
     public static void free(Buffer pBuffer) {
         MemoryUtil.memFree(pBuffer);
         bufferList.remove(pBuffer);
+    }
+
+    /**
+     * Frees the given collection of buffers and removes them from the buffer list.
+     *
+     * @param pBuffers The buffers to free.
+     */
+    public static void free(Collection<Buffer> pBuffers){
+        for(Buffer b : pBuffers){
+            free(b);
+        }
     }
 
     /**
