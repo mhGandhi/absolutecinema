@@ -163,9 +163,11 @@ public class AbsoluteCinema {
 
         objModel = new BufferWrapper(6);
         float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("models/mountains.obj"));
-        FloatBuffer vertexBuffer = MemoryUtil.memAllocFloat(cubeVts.length);
+        FloatBuffer vertexBuffer = Buffers.floatBuffer(cubeVts.length);
         vertexBuffer.put(cubeVts).flip();
+        Buffers.free(vertexBuffer);
         objModel.uploadToVBO(vertexBuffer);
+
         objModel.addField(3,false);
         objModel.addField(3,true);
     }
@@ -193,6 +195,7 @@ public class AbsoluteCinema {
 
     private void terminate(){
         glfwTerminate();
+        Buffers.freeAll();
     }
     private long frameCount = 0;
     private void frame(){
@@ -210,6 +213,5 @@ public class AbsoluteCinema {
 
 
         window.swapBuffers();
-        if(frameCount%100_000==0) System.out.println(frameCount);
     }
 }
