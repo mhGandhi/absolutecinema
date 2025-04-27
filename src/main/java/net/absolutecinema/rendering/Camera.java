@@ -3,117 +3,84 @@ package net.absolutecinema.rendering;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-//todo provisorisch
 public class Camera {
-    private static final float PITCH_MIN = (float) (-Math.PI / 2); // -90 degrees in radians
-    private static final float PITCH_MAX = (float) (Math.PI / 2);  // 90 degrees in radians
+    private static final float PITCH_MIN = (float) Math.toRadians(-89.0f);
+    private static final float PITCH_MAX = (float) Math.toRadians(89.0f);
 
+    private final Matrix4f viewMatrix = new Matrix4f();
+    private final Matrix4f projectionMatrix = new Matrix4f().identity();
+    private final Vector3f position = new Vector3f(0, 0, 0);
+    private final Vector3f forward = new Vector3f(0, 0, -1);
+    private final Vector3f up = new Vector3f(0, 1, 0);
+    private final Vector3f right = new Vector3f(1, 0, 0);
+    private final Vector3f center = new Vector3f();
 
-    private float x, y, z;
-    private float pitch, yaw, roll;
+    private float pitch = 0.0f;
+    private float yaw = 0.0f;
+    private float roll = 0.0f;
 
     private final float sensitivity = 0.002f;
 
     public Camera() {
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
-        this.pitch = 0.0f;
-        this.yaw = 0.0f;
-        this.roll = 0.0f;
+
     }
 
-    public float getX() { return x; }
-    public float getY() { return y; }
-    public float getZ() { return z; }
-
-    public void setX(float pX){if(!Float.isNaN(pX))this.x = pX;}
-    public void setY(float pY){if(!Float.isNaN(pY))this.y = pY;}
-    public void setZ(float pZ){if(!Float.isNaN(pZ))this.z = pZ;}
-
-    public float getPitch(){return this.pitch;}
-    public float getYaw(){return this.yaw;}
-    public float getRoll(){return this.roll;}
-
-    public void setPitch(float pPitch) {
-        this.pitch = Math.max(PITCH_MIN, Math.min(PITCH_MAX, pPitch));
-    }
-    public void setYaw(float pYaw) {
-        this.yaw = (float) (pYaw%(2*Math.PI));//todo cap that
-    }
-    public void setRoll(float pRoll) {
-        this.roll = (float) (pRoll%(2*Math.PI));
+    public void moveForward(float distance) {
+        position.add(forward.x * distance, forward.y * distance, forward.z * distance);
     }
 
-    public void translate(float pX, float pY, float pZ){
-        setX(getX()+pX);
-        setY(getY()+pY);
-        setZ(getZ()+pZ);
+    public void moveRight(float distance) {
+        position.add(right.x * distance, right.y * distance, right.z * distance);
     }
 
-    public void moveForward(float pM){
-        Vector3f translation = (getForward().normalize().mul(pM));
-        translate(translation.x, translation.y, translation.z);
-    }
-    public void moveRight(float pM){
-        Vector3f translation = (getRight().normalize().mul(pM));
-        //System.out.println(getRight());
-        //System.out.println(translation);
-        translate(translation.x, translation.y, translation.z);
-    }
-    public void moveUp(float pM){
-        Vector3f translation = (getUp().normalize().mul(pM));
-        translate(translation.x, translation.y, translation.z);
+    public void moveUp(float distance) {
+        position.add(up.x * distance, up.y * distance, up.z * distance);
     }
 
-    public Vector3f getPos(){
-        return new Vector3f(getX(),getY(),getZ());
+    public void yaw(float deltaYaw) {
+        yaw += deltaYaw * sensitivity;
+        updateVectors();
     }
 
-    public Vector3f getWorldUp(){
-        return new Vector3f(0,1,0);
+    public void pitch(float deltaPitch) {
+        pitch -= deltaPitch * sensitivity;
+        pitch = Math.max(PITCH_MIN, Math.min(PITCH_MAX, pitch));
+        updateVectors();
     }
 
-    public Vector3f getUp(){
-        Vector3f up = getWorldUp();
-        up.rotateX(getPitch()).rotateY(getYaw()).rotateZ(getRoll());
-        return up;
+    public void roll(float deltaRoll) {
+        roll += deltaRoll * sensitivity;
+        updateVectors();
     }
-    public Vector3f getForward(){
-        Vector3f forward = new Vector3f(0,0,-1);
-        forward.rotateX(getPitch()).rotateY(getYaw()).rotateZ(getRoll());
-        return forward;
-    }
-    public Vector3f getRight(){
-        return getForward().cross(getUp());
-    }
-
-    public Vector3f getLookAt() {
-        return new Vector3f(getPos()).add(getForward());
-    }
-
-    // Rotation methods (change orientatigiton of the camera)
-    public void yaw(float delta) { setYaw(getYaw() + delta * sensitivity) ; }
-    public void pitch(float delta) { setPitch(getPitch() - delta * sensitivity); }
-    public void roll(float delta){setRoll(getRoll()+ delta * sensitivity); }
 
     public Matrix4f getViewMatrix() {
-        Matrix4f view = new Matrix4f();
-        view.lookAt(getPos(), getLookAt(), getUp());
-        return view;
+        center.set(position).add(forward);
+        viewMatrix.identity();
+        viewMatrix.lookAt(position, center, up);
+        return viewMatrix;
     }
 
     public Matrix4f getProjectionMatrix(float fov, float aspectRatio, float near, float far) {
-        Matrix4f projection = new Matrix4f();
-        projection.perspective(fov, aspectRatio, near, far);
-        return projection;
+        projectionMatrix.perspective(fov, aspectRatio, near, far);
+        return projectionMatrix;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Camera{[%.2f|%.2f|%.2f] [p=%.2f|y=%.2f|r=%.2f]}",
-                x, y, z,
-                Math.toDegrees(getPitch()), Math.toDegrees(getYaw()), Math.toDegrees(getRoll()));
+    public Vector3f getPos() {
+        return position;
+    }
+
+    private void updateVectors() {
+        forward.x = (float) (Math.cos(pitch) * Math.sin(yaw));
+        forward.y = (float) Math.sin(pitch);
+        forward.z = (float) (Math.cos(pitch) * Math.cos(yaw));
+        forward.normalize();
+
+        float cosRoll = (float) Math.cos(roll);
+        float sinRoll = (float) Math.sin(roll);
+
+        right.set(forward).cross(0f, 1f, 0f).normalize();
+        right.set(right.x * cosRoll - up.x * sinRoll, right.y * cosRoll - up.y * sinRoll, right.z * cosRoll - up.z * sinRoll);
+
+        up.set(right).cross(forward).normalize();
     }
 }
-
