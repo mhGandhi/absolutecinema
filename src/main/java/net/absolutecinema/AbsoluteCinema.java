@@ -4,6 +4,8 @@ import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.Window;
 import net.absolutecinema.rendering.meshes.BufferWrapper;
+import net.absolutecinema.rendering.meshes.Mesh;
+import net.absolutecinema.rendering.meshes.VertexNormalMesh;
 import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
@@ -37,7 +39,7 @@ public class AbsoluteCinema {
     Uni<Matrix4f> projection;
     Uni<Matrix4f> model;
     Uni<Vector3f> cameraPos;
-    BufferWrapper objModel;
+    Mesh objModel;
 
     Camera cam;
     double lastX = Double.MAX_VALUE;
@@ -161,15 +163,9 @@ public class AbsoluteCinema {
             cameraPos.set(cam.getPos());
         }
 
-        objModel = new BufferWrapper(6);
+        objModel = new VertexNormalMesh();
         float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("models/mountains.obj"));
-        FloatBuffer vertexBuffer = Buffers.floatBuffer(cubeVts.length);
-        vertexBuffer.put(cubeVts).flip();
-        Buffers.free(vertexBuffer);
-        objModel.uploadToVBO(vertexBuffer);
-
-        objModel.addField(3,false);
-        objModel.addField(3,true);
+        objModel.assignVertices(cubeVts);
     }
 
     private void loop(){
