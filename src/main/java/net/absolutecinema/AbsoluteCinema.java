@@ -15,6 +15,8 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -25,20 +27,22 @@ public class AbsoluteCinema {
 
     private boolean running;
     private Window window;
+    private long frameCount;
 
     private final GameConfig config;
-
     private final Runtime runtime;
 
+//////////////////////////////////////////////////
     Uni<Matrix4f> view;
     Uni<Matrix4f> projection;
     Uni<Matrix4f> model;
     Uni<Vector3f> cameraPos;
-    Mesh objModel;
+    List<Mesh> objModels;
 
     Camera cam;
     double lastX = Double.MAX_VALUE;
     double lastY = Double.MAX_VALUE;
+//////////////////////////////////////////////////
 
     public AbsoluteCinema(final GameConfig pConfig){
         instance = this;
@@ -46,6 +50,7 @@ public class AbsoluteCinema {
 
         this.running = false;
         this.window = null;
+        frameCount = 0;
 
         config = pConfig;
         runtime = Runtime.getRuntime();
@@ -163,9 +168,14 @@ public class AbsoluteCinema {
 
         //setUp objects
         {
-            objModel = new VertexNormalMesh();
-            float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("models/mountains.obj"));
-            objModel.assignVertices(cubeVts);
+            objModels = new LinkedList<>();
+            String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
+            for(String filename : meshPaths){
+                float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
+                Mesh m = new VertexNormalMesh();
+                m.assignVertices(vertices);
+                objModels.add(m);
+            }
         }
 
     }
@@ -195,7 +205,7 @@ public class AbsoluteCinema {
         GraphicsWrapper.terminate();
         Buffers.freeAll();
     }
-    private long frameCount = 0;
+
     private void frame(){
         GraphicsWrapper.clearWin();
         frameCount++;
@@ -207,7 +217,10 @@ public class AbsoluteCinema {
         view.set(cam.getViewMatrix());
         cameraPos.set(cam.getPos());
 
-        objModel.draw();
+        for (Mesh m : objModels) {
+            model.set(new Matrix4f().translate(new Vector3f(0,-10,1)));//todo
+            m.draw();
+        }
 
 
         window.swapBuffers();
