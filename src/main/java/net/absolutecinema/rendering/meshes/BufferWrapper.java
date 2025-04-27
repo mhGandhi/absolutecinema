@@ -59,6 +59,7 @@ public class BufferWrapper {
     }
 
     public void draw(){
+        bindVAO();
         GraphicsWrapper.drawTriangles(vertCount);
     }
 

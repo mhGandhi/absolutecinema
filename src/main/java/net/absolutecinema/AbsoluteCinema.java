@@ -208,7 +208,7 @@ public class AbsoluteCinema {
 
         view.set(cam.getViewMatrix());
         cameraPos.set(cam.getPos());
-        objModel.bindVAO();
+
         objModel.draw();
 
 
