@@ -60,7 +60,7 @@ public class AbsoluteCinema {
     }
 
     private void init(){
-        GraphicsWrapper.setErrorPrintStream(System.err);//todo LOGGER
+        GraphicsWrapper.setErrorPrintStream(LOGGER.getErrorStream());
         GraphicsWrapper.init();
 
         GraphicsWrapper.setWindowHints();
