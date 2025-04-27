@@ -56,28 +56,10 @@ public class AbsoluteCinema {
 
     public void run(){
         this.running = true;
-        final long startTime = System.currentTimeMillis();
 
         init();
-
-        int frames = 0;
-        double timer = glfwGetTime();
-
-        while(this.running){
-            frame();
-
-            double currentTime = glfwGetTime();
-            frames++;
-            if (currentTime - timer >= 1.0) {
-                long totalMemory = runtime.totalMemory();
-                long freeMemory = runtime.freeMemory();
-                long usedMemory = totalMemory - freeMemory;
-
-                window.setTitle("ABSOLUTE CINEMA - "+frames+" fps - "+usedMemory/(1024*1024)+"/"+totalMemory/(1024*1024)+" MB");
-                frames = 0;
-                timer += 1.0;
-            }
-        }
+        loop();
+        terminate();
     }
 
     private void init(){
@@ -188,6 +170,30 @@ public class AbsoluteCinema {
         objModel.addField(3,true);
     }
 
+    private void loop(){
+        int frames = 0;
+        double timer = glfwGetTime();
+
+        while(this.running){
+            frame();
+
+            double currentTime = glfwGetTime();
+            frames++;
+            if (currentTime - timer >= 1.0) {
+                long totalMemory = runtime.totalMemory();
+                long freeMemory = runtime.freeMemory();
+                long usedMemory = totalMemory - freeMemory;
+
+                window.setTitle("ABSOLUTE CINEMA - "+frames+" fps - "+usedMemory/(1024*1024)+"/"+totalMemory/(1024*1024)+" MB");
+                frames = 0;
+                timer += 1.0;
+            }
+        }
+    }
+
+    private void terminate(){
+        glfwTerminate();
+    }
     private long frameCount = 0;
     private void frame(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
