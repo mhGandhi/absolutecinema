@@ -140,7 +140,7 @@ public class AbsoluteCinema {
             }catch (Exception e){
                 e.printStackTrace();
             }
-            shaderProgram.link();
+            shaderProgram.linkAndClearShaders();
             shaderProgram.use();
 
             view = new Uni<>(shaderProgram, "view");

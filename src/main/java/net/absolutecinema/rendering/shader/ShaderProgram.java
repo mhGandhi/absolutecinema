@@ -3,14 +3,21 @@ package net.absolutecinema.rendering.shader;
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
 public class ShaderProgram extends GLObject {
     private boolean linked;
 
+    private List<Shader> shaders;
+
     public ShaderProgram(){
         super(GraphicsWrapper.createProgram());
         linked = false;
+
+        shaders = new LinkedList<>();
     }
 
     public Uni<?> getUni(CharSequence pName){
@@ -27,9 +34,10 @@ public class ShaderProgram extends GLObject {
         //    shaders.add(pShader);
         //}
         GraphicsWrapper.attachShader(this.id, pShader.id);
+        shaders.add(pShader);
     }
 
-    public void link(){
+    public void linkAndClearShaders(){
         //for(Shader shader : shaders){
         //    OpenGLWrapper.attachShader(this.id, shader.id);
         //}
@@ -40,6 +48,10 @@ public class ShaderProgram extends GLObject {
             return;
         }
         linked = true;
+
+        for (Shader s: shaders) {
+            s.delete();
+        }
     }
 
     public boolean getLinked(){
