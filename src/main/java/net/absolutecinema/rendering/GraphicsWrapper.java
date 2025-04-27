@@ -5,14 +5,17 @@ import net.absolutecinema.rendering.shader.ShaderCompilationException;
 import net.absolutecinema.rendering.shader.ShaderType;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL33;
 
 
+import java.io.PrintStream;
 import java.nio.FloatBuffer;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GraphicsWrapper {
@@ -117,7 +120,6 @@ public class GraphicsWrapper {
     public static void createCapabilities(){
         GL.createCapabilities();
     }
-    //todo make vsync directly
     public static void swapInterval(int pIv){
         glfwSwapInterval(pIv);
     }
@@ -132,6 +134,20 @@ public class GraphicsWrapper {
     }
     public static void setWindowTitle(long pWindowId, String pTitle){
         glfwSetWindowTitle(pWindowId, pTitle);
+    }
+    public static void setWindowHints(){
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);//todo maybe not always?
+    }
+    public static void pollEvents(){
+        glfwPollEvents();
+    }
+    public static boolean windowShouldClose(long pWindowId){
+        return glfwWindowShouldClose(pWindowId);
+    }
+    public static void clearWin(){
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////VAO
     public static int genVAO(){
@@ -175,5 +191,15 @@ public class GraphicsWrapper {
 
     public static void drawTriangles(int pCount){
         GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, pCount);
+    }
+
+    public static void init(){
+        initGLFW();
+    }
+    public static void terminate(){
+        glfwTerminate();
+    }
+    public static void setErrorPrintStream(PrintStream pPS){
+        GLFWErrorCallback.createPrint(pPS).set();
     }
 }

@@ -1,6 +1,5 @@
 package net.absolutecinema.rendering;
 
-import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -24,7 +23,7 @@ public class Window {
     }
 
     public boolean shouldClose(){
-        return glfwWindowShouldClose(this.id);
+        return GraphicsWrapper.windowShouldClose(this.id);
     }
 
     public void swapBuffers() {

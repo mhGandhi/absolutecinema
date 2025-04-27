@@ -3,7 +3,6 @@ package net.absolutecinema;
 import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.Window;
-import net.absolutecinema.rendering.meshes.BufferWrapper;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.meshes.VertexNormalMesh;
 import net.absolutecinema.rendering.shader.Shader;
@@ -12,15 +11,11 @@ import net.absolutecinema.rendering.shader.ShaderType;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.system.MemoryUtil;
 
-import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static net.absolutecinema.rendering.GraphicsWrapper.initGLFW;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -65,12 +60,10 @@ public class AbsoluteCinema {
     }
 
     private void init(){
-        GLFWErrorCallback.createPrint(System.err).set();//todo to LOGGER
-        initGLFW();
+        GraphicsWrapper.setErrorPrintStream(System.err);//todo LOGGER
+        GraphicsWrapper.init();
 
-        glfwDefaultWindowHints();//todo hide that shi
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        GraphicsWrapper.setWindowHints();
 
         this.window = new Window();
         this.window.select();
@@ -131,10 +124,11 @@ public class AbsoluteCinema {
             });
         }
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glEnable(GL_DEPTH_TEST);//todo
+        glDepthFunc(GL_LESS);//todo
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);//todo
 
+        //setUp shader
         {
             ShaderProgram shaderProgram = new ShaderProgram();
             Path shaderpath = config.assetDirectory().toPath().resolve("shader");
@@ -153,9 +147,11 @@ public class AbsoluteCinema {
             projection = new Uni<>(shaderProgram, "projection");
             model = new Uni<>(shaderProgram, "model");
             cameraPos = new Uni<>(shaderProgram, "cameraPos");
+        }
 
+        //setUp cam
+        {
             cam = new Camera();
-            //cam.setX(10);
 
             view.set(cam.getViewMatrix());
             projection.set(cam.getProjectionMatrix((float) Math.toRadians(90.0f), ((float) 800 / (float) 600), 0.1f, 100.0f));
@@ -163,9 +159,13 @@ public class AbsoluteCinema {
             cameraPos.set(cam.getPos());
         }
 
-        objModel = new VertexNormalMesh();
-        float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("models/mountains.obj"));
-        objModel.assignVertices(cubeVts);
+        //setUp objects
+        {
+            objModel = new VertexNormalMesh();
+            float[] cubeVts = Util.trisFromObj(config.assetDirectory().toPath().resolve("models/mountains.obj"));
+            objModel.assignVertices(cubeVts);
+        }
+
     }
 
     private void loop(){
@@ -190,14 +190,14 @@ public class AbsoluteCinema {
     }
 
     private void terminate(){
-        glfwTerminate();
+        GraphicsWrapper.terminate();
         Buffers.freeAll();
     }
     private long frameCount = 0;
     private void frame(){
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GraphicsWrapper.clearWin();
         frameCount++;
-        glfwPollEvents();
+        GraphicsWrapper.pollEvents();
         if(window.shouldClose()){
             running = false;
         }
