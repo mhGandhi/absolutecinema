@@ -63,13 +63,15 @@ public class AbsoluteCinema {
         GraphicsWrapper.setErrorPrintStream(LOGGER.getErrorStream());
         GraphicsWrapper.init();
 
-        GraphicsWrapper.setWindowHints();
-
-        this.window = new Window();
-        this.window.select();
-        GraphicsWrapper.createCapabilities();
-        this.window.show();
-        //this.window.enableVsync();
+        //setUp window
+        {
+            GraphicsWrapper.setWindowHints();
+            this.window = new Window();
+            this.window.select();
+            GraphicsWrapper.createCapabilities();
+            this.window.show();
+            //this.window.enableVsync();
+        }
 
         //CALLBACKS todo remove
         {
