@@ -95,19 +95,19 @@ public class AbsoluteCinema {
             //glfwSetInputMode(testWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             //glfwSetInputMode(testWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             glfwSetInputMode(window.id, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-            glfwSetCursorPosCallback(window.id, (window, xpos, ypos) -> {
+            glfwSetCursorPosCallback(window.id, (window, xPos, yPos) -> {
                 if (lastX == Double.MAX_VALUE || lastY == Double.MAX_VALUE) {
-                    lastX = xpos;
-                    lastY = ypos;
+                    lastX = xPos;
+                    lastY = yPos;
                 }
-                float deltaX = (float) (xpos - lastX);
-                float deltaY = (float) (ypos - lastY);
+                float deltaX = (float) (xPos - lastX);
+                float deltaY = (float) (yPos - lastY);
 
                 cam.yaw(-deltaX);
                 cam.pitch(deltaY);
 
-                lastX = xpos;
-                lastY = ypos;
+                lastX = xPos;
+                lastY = yPos;
             });
 
             glfwSetWindowFocusCallback(window.id, (window, focused) -> {
