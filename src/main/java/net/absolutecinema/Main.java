@@ -16,5 +16,8 @@ public class Main {
     MESH (DIFFERENT KINDS)
     MORE SOLID VToV fields
     (TEXTURE)
+    Auto decide Mesh type
+    Model Class (interface?) for static ones, groups etc
+    Gridlines
     */
 }
