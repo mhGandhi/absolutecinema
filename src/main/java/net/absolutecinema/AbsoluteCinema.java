@@ -1,5 +1,6 @@
 package net.absolutecinema;
 
+import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.Window;
@@ -33,11 +34,11 @@ public class AbsoluteCinema {
     private final Runtime runtime;
 
 //////////////////////////////////////////////////
-    Uni<Matrix4f> view;
-    Uni<Matrix4f> projection;
-    Uni<Matrix4f> model;
-    Uni<Vector3f> cameraPos;
-    List<Mesh> objModels;
+    Uni<Matrix4f> viewMat;
+    Uni<Matrix4f> projectionMat;
+    Uni<Matrix4f> modelMat;
+    Uni<Vector3f> cameraPosVec;
+    List<Model> objModels;
 
     Camera cam;
     double lastX = Double.MAX_VALUE;
@@ -150,20 +151,20 @@ public class AbsoluteCinema {
             shaderProgram.linkAndClearShaders();
             shaderProgram.use();
 
-            view = new Uni<>(shaderProgram, "view");
-            projection = new Uni<>(shaderProgram, "projection");
-            model = new Uni<>(shaderProgram, "model");
-            cameraPos = new Uni<>(shaderProgram, "cameraPos");
+            viewMat = new Uni<>(shaderProgram, "view");
+            projectionMat = new Uni<>(shaderProgram, "projection");
+            modelMat = new Uni<>(shaderProgram, "model");
+            cameraPosVec = new Uni<>(shaderProgram, "cameraPos");
         }
 
         //setUp cam
         {
             cam = new Camera();
 
-            view.set(cam.getViewMatrix());
-            projection.set(cam.getProjectionMatrix((float) Math.toRadians(90.0f), ((float) 800 / (float) 600), 0.1f, 100.0f));
-            model.set(new Matrix4f().identity());
-            cameraPos.set(cam.getPos());
+            viewMat.set(cam.getViewMatrix());
+            projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(90.0f), ((float) 800 / (float) 600), 0.1f, 100.0f));
+            modelMat.set(new Matrix4f().identity());
+            cameraPosVec.set(cam.getPos());
         }
 
         //setUp objects
@@ -174,8 +175,9 @@ public class AbsoluteCinema {
                 float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
                 Mesh m = new VertexNormalMesh();
                 m.assignVertices(vertices);
-                objModels.add(m);
+                objModels.add(new Model(m, modelMat));
             }
+            objModels.get(0).setModelMat(new Matrix4f().identity().translate(-10,-10,-10));
         }
 
     }
@@ -214,11 +216,10 @@ public class AbsoluteCinema {
             running = false;
         }
 
-        view.set(cam.getViewMatrix());
-        cameraPos.set(cam.getPos());
+        viewMat.set(cam.getViewMatrix());
+        cameraPosVec.set(cam.getPos());
 
-        for (Mesh m : objModels) {
-            model.set(new Matrix4f().translate(new Vector3f(0,-10,1)));//todo
+        for (Model m : objModels) {
             m.draw();
         }
 
