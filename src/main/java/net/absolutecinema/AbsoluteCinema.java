@@ -1,5 +1,6 @@
 package net.absolutecinema;
 
+import net.absolutecinema.models.LeafModel;
 import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
@@ -18,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -43,6 +45,8 @@ public class AbsoluteCinema {
     Camera cam;
     double lastX = Double.MAX_VALUE;
     double lastY = Double.MAX_VALUE;
+    Vector3f manPos = new Vector3f(0,0,0);
+    float manYaw = 0f;
 //////////////////////////////////////////////////
 
     public AbsoluteCinema(final GameConfig pConfig){
@@ -175,9 +179,9 @@ public class AbsoluteCinema {
                 float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
                 Mesh m = new VertexNormalMesh();
                 m.assignVertices(vertices);
-                objModels.add(new Model(m, modelMat));
+                objModels.add(new LeafModel(m, modelMat));
             }
-            objModels.get(0).setModelMat(new Matrix4f().identity().translate(-10,-10,-10));
+            objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }
 
     }
@@ -218,6 +222,11 @@ public class AbsoluteCinema {
 
         viewMat.set(cam.getViewMatrix());
         cameraPosVec.set(cam.getPos());
+
+        manYaw += 0.01f;
+        manPos.add(0,0,0.001f);
+        objModels.get(1).setPos(manPos);
+        objModels.get(1).setRotation(manYaw, manYaw, manYaw);
 
         for (Model m : objModels) {
             m.draw();
