@@ -1,6 +1,5 @@
 package net.absolutecinema;
 
-import net.absolutecinema.models.LeafModel;
 import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
@@ -19,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -140,9 +138,10 @@ public class AbsoluteCinema {
         glDepthFunc(GL_LESS);//todo
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);//todo
 
+        ShaderProgram shaderProgram;
         //setUp shader
         {
-            ShaderProgram shaderProgram = new ShaderProgram();
+            shaderProgram = new ShaderProgram();
             Path shaderpath = config.assetDirectory().toPath().resolve("shader");
             try{
                 Shader vsh = new Shader(ShaderType.VERTEX, Files.readString(shaderpath.resolve("shader.vert")));
@@ -179,7 +178,7 @@ public class AbsoluteCinema {
                 float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
                 Mesh m = new VertexNormalMesh();
                 m.assignVertices(vertices);
-                objModels.add(new LeafModel(m, modelMat));
+                objModels.add(new Model(m, shaderProgram, filename.equals("man")?objModels.get(0):null, modelMat));
             }
             objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }
@@ -223,15 +222,14 @@ public class AbsoluteCinema {
         viewMat.set(cam.getViewMatrix());
         cameraPosVec.set(cam.getPos());
 
-        manYaw += 0.01f;
-        manPos.add(0,0,0.001f);
+        manYaw += 0.00001f;
+        manPos.add(0,0,0.0002f);
         objModels.get(1).setPos(manPos);
-        objModels.get(1).setRotation(manYaw, manYaw, manYaw);
+        objModels.get(0).setRotation(0, manYaw, 0);
 
         for (Model m : objModels) {
             m.draw();
         }
-
 
         window.swapBuffers();
     }
