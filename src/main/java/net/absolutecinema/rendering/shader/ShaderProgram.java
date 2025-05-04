@@ -99,8 +99,9 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         }
         shaders.clear();
 
+        String[] className =this.getClass().toString().split("\\.");
         LOGGER.info(
-                "Program linked with layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
+                "<"+className[className.length-1]+"> linked with layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
                 +"and uniforms:\n"+Uni.uniMapToString(uniforms)
         );
     }
