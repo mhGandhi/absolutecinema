@@ -2,20 +2,18 @@ package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
-import net.absolutecinema.rendering.UniformType;
+import net.absolutecinema.rendering.meshes.Mesh;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
-public class ShaderProgram extends GLObject {
+public class ShaderProgram extends GLObject implements AutoCloseable {
     private boolean linked;
 
-    private List<Shader> shaders;
-    private Map<String, Uni<?>> uniforms;
+    private final List<Shader> shaders;
+    private final Map<String, Uni<?>> uniforms;
+    private final List<LayoutEntry> fieldsLayout;
 
     public ShaderProgram(){
         super(GraphicsWrapper.createProgram());
@@ -23,9 +21,14 @@ public class ShaderProgram extends GLObject {
 
         shaders = new LinkedList<>();
         uniforms = new HashMap<>();
+        fieldsLayout = new LinkedList<>();
     }
 
     public Uni<?> addUni(CharSequence pName, Object initVal){
+        if(isLinked()){
+            throw new UniformException("ShaderProgram already linked; can not modify uniforms");
+        }
+
         Uni<?> uniform = new Uni<>(this, pName, initVal);
         uniforms.put((String)pName, uniform);
         return uniform;
@@ -33,6 +36,19 @@ public class ShaderProgram extends GLObject {
 
     public Uni<?> getUni(String pUniKey){
         return uniforms.get(pUniKey);
+    }
+
+    public void addLayoutEntry(LayoutEntry pLE){
+        if(isLinked()){
+            LOGGER.err("ShaderProgram already linked; can not modify layout - returning");
+            return;
+        }
+
+        this.fieldsLayout.add(pLE);
+    }
+
+    public Collection<LayoutEntry> getLayout(){
+        return this.fieldsLayout;
     }
 
     public void attach(Shader pShader){
@@ -48,7 +64,7 @@ public class ShaderProgram extends GLObject {
     }
 
     public void detach(Shader pShader){
-        if(linked){
+        if(isLinked()){
             LOGGER.err("ShaderProgram already linked; can not detach ["+pShader+"] - returning");
             return;
         }
@@ -62,7 +78,7 @@ public class ShaderProgram extends GLObject {
         shaders.remove(pShader);
     }
 
-    public void linkAndClearShaders(){
+    public void linkAndClearShaders(){//todo assert uniform + layout names all set up correctly
         if(linked) {
             LOGGER.err("ShaderProgram ["+this+"] already linked - returning");
             return;
@@ -74,11 +90,23 @@ public class ShaderProgram extends GLObject {
             LOGGER.err(e.getMessage());
             return;
         }
+
+        assignUnis();
         linked = true;
 
         for (Shader s: shaders) {
-            s.delete();
+            s.close();
         }
+        shaders.clear();
+
+        LOGGER.info(
+                "Program linked with layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
+                +"and uniforms:\n"+Uni.uniMapToString(uniforms)
+        );
+    }
+
+    protected void assignUnis() {
+
     }
 
     public boolean isLinked(){
@@ -89,7 +117,26 @@ public class ShaderProgram extends GLObject {
         GraphicsWrapper.useProgram(this.id);
     }
 
-    public void delete(){
+    public void close(){
         GraphicsWrapper.deleteProgram(this.id);
+    }
+
+    public Mesh newCompatibleMesh(){
+        if(!isLinked()){
+            throw new ProgramLinkingException("Program is not yet linked - can not generate BufferWrapper");
+        }
+
+        int fieldsSize = 0;
+        for(LayoutEntry le : fieldsLayout){
+            fieldsSize += le.size();
+        }
+
+        Mesh ret = new Mesh(fieldsSize);
+
+        for(LayoutEntry le : fieldsLayout){
+            ret.addField(le.size(), le.type(), le.normalize());
+        }
+
+        return ret;
     }
 }

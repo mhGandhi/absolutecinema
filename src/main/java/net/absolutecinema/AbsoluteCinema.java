@@ -6,17 +6,12 @@ import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.Window;
 import net.absolutecinema.rendering.meshes.Mesh;
-import net.absolutecinema.rendering.meshes.VertexNormalMesh;
-import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.ShaderProgram;
-import net.absolutecinema.rendering.shader.ShaderType;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -166,13 +161,15 @@ public class AbsoluteCinema {
 
         //setUp objects
         {
+            ShaderProgram shaderProgram = shaderManager.getShaderProgram("norm");
+
             objModels = new LinkedList<>();
             String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
             for(String filename : meshPaths){
                 float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
-                Mesh m = new VertexNormalMesh();
+                Mesh m = shaderProgram.newCompatibleMesh();
                 m.assignVertices(vertices);
-                objModels.add(new Model(m, shaderManager.getShaderProgram("norm"), filename.equals("man")?objModels.get(0):null, modelMat));
+                objModels.add(new Model(m, shaderProgram, filename.equals("man")?objModels.get(0):null, modelMat));
             }
             objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }

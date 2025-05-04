@@ -3,6 +3,7 @@ package net.absolutecinema.rendering;
 import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
+import net.absolutecinema.rendering.shader.StaticShaderPrg;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +49,7 @@ public class ShaderManager {
                     .toList();
         }
 
-        ShaderProgram ret = new ShaderProgram();
+        ShaderProgram ret = new StaticShaderPrg();
         for (Path sh : indShaders){
             ret.attach(
                     new Shader(

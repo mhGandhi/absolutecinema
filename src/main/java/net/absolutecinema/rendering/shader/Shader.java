@@ -3,7 +3,7 @@ package net.absolutecinema.rendering.shader;
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
 
-public class Shader extends GLObject {
+public class Shader extends GLObject implements AutoCloseable {
     public final ShaderType type;
 
     public Shader(ShaderType pShaderType, String pSourceCode){
@@ -21,7 +21,7 @@ public class Shader extends GLObject {
         GraphicsWrapper.compileShader(this.id);
     }
 
-    public void delete(){
+    public void close(){
         GraphicsWrapper.deleteShader(this.id);
     }
 }

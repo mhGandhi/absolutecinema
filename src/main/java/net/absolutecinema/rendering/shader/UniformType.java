@@ -1,4 +1,4 @@
-package net.absolutecinema.rendering;
+package net.absolutecinema.rendering.shader;
 
 
 import org.joml.Matrix4f;
