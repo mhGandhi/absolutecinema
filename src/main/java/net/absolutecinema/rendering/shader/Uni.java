@@ -2,6 +2,7 @@ package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
+import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 
 import java.util.Map;
 

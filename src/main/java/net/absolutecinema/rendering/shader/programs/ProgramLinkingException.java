@@ -1,4 +1,4 @@
-package net.absolutecinema.rendering.shader;
+package net.absolutecinema.rendering.shader.programs;
 
 public class ProgramLinkingException extends RuntimeException {
     public ProgramLinkingException(String message) {

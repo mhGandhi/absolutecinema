@@ -5,14 +5,13 @@ import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.Window;
-import net.absolutecinema.rendering.meshes.Mesh;
-import net.absolutecinema.rendering.shader.ShaderProgram;
-import net.absolutecinema.rendering.shader.Simple3DShader;
+import net.absolutecinema.rendering.shader.programs.Simple3DShader;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,13 +23,13 @@ public class AbsoluteCinema {
     public static Logger LOGGER = null;
     public static GameConfig config;
     public static Options options;
+    public static ShaderManager shaderManager;
 
     private boolean running;
     private Window window;
     private long frameCount;
 
     public final Runtime runtime;
-    private final ShaderManager shaderManager;
 
 //////////////////////////////////////////////////
     Uni<Matrix4f> viewMat;
@@ -51,13 +50,13 @@ public class AbsoluteCinema {
         LOGGER = new Logger();
         config = pConfig;
         options = new Options();//todo load from file
+        shaderManager = new ShaderManager();
 
         this.running = false;
         this.window = null;
         frameCount = 0;
 
         runtime = Runtime.getRuntime();
-        shaderManager = new ShaderManager();
     }
 
     public void run(){
@@ -71,7 +70,7 @@ public class AbsoluteCinema {
     private void init(){
         {//setUp options
             options.setFpsCap(Integer.MAX_VALUE);
-            options.setFov(90);
+            options.setFov(90f);
         }
 
         GraphicsWrapper.setErrorPrintStream(LOGGER.getErrorStream());
@@ -146,8 +145,10 @@ public class AbsoluteCinema {
 
         //setUp shader
         {
-            shaderManager.loadShader("norm", new Simple3DShader());
-            Simple3DShader shaderProgram = (Simple3DShader) shaderManager.getShaderProgram("norm");
+            Simple3DShader shaderProgram =
+                    (Simple3DShader) shaderManager.loadShader(
+                            "norm", new Simple3DShader()
+                    );//shader loading only once
 
             shaderProgram.use();
 
@@ -163,21 +164,21 @@ public class AbsoluteCinema {
 
             viewMat.set(cam.getViewMatrix());
             projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.1f, 100.0f));
-            modelMat.set(new Matrix4f().identity());
             cameraPosVec.set(cam.getPos());
         }
 
         //setUp objects
         {
-            ShaderProgram shaderProgram = shaderManager.getShaderProgram("norm");
-
             objModels = new LinkedList<>();
             String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
             for(String filename : meshPaths){
-                float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
-                Mesh m = shaderProgram.newCompatibleMesh();
-                m.assignVertices(vertices);
-                objModels.add(new Model(m, shaderProgram, filename.equals("man")?objModels.get(0):null, modelMat));
+                Path objPath = config.assetDirectory().toPath().resolve("models").resolve(filename+".obj");
+                Model add = Model.fromFile(objPath);
+
+                if(filename.equals("man")){
+                    add.setParent(objModels.get(0));
+                }
+                objModels.add(add);
             }
             objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }

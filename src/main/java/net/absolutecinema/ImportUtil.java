@@ -1,13 +1,77 @@
 package net.absolutecinema;
 
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.assimp.*;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Util {
+public class ImportUtil {
+
+    public static float[] otrisFromObj(Path pPath) {
+        String modelPath = pPath.toAbsolutePath().toString();
+
+
+        AIScene scene = Assimp.aiImportFile(modelPath,
+                Assimp.aiProcess_Triangulate |
+                        Assimp.aiProcess_JoinIdenticalVertices |
+                        //Assimp.aiProcess_GenSmoothNormals |
+                        Assimp.aiProcess_FlipUVs);
+
+        if (scene == null || (scene.mFlags() & Assimp.AI_SCENE_FLAGS_INCOMPLETE) != 0 || scene.mRootNode() == null) {
+            throw new RuntimeException("Failed to load model: " + Assimp.aiGetErrorString());
+        }
+
+        List<Float> data = new ArrayList<>();
+
+        int meshCount = scene.mNumMeshes();
+        PointerBuffer meshBuffer = scene.mMeshes();
+
+        for (int i = 0; i < meshCount; i++) {
+            AIMesh mesh = AIMesh.create(meshBuffer.get(i));
+
+            AIVector3D.Buffer vertices = mesh.mVertices();
+            AIVector3D.Buffer normals = mesh.mNormals();
+            AIFace.Buffer faces = mesh.mFaces();
+
+            for (int j = 0; j < faces.remaining(); j++) {
+                AIFace face = faces.get(j);
+
+                if (face.mNumIndices() != 3) {
+                    continue; // Skip non-triangle faces (shouldn't happen if aiProcess_Triangulate is used)
+                }
+
+                for (int k = 0; k < 3; k++) {
+                    int index = face.mIndices().get(k);
+                    AIVector3D vertex = vertices.get(index);
+                    AIVector3D normal = normals.get(index);
+
+                    data.add(vertex.x());
+                    data.add(vertex.y());
+                    data.add(vertex.z());
+
+                    data.add(normal.x());
+                    data.add(normal.y());
+                    data.add(normal.z());
+                }
+            }
+        }
+
+        // Convert List<Float> to float[]
+        float[] result = new float[data.size()];
+        for (int i = 0; i < data.size(); i++) {
+            result[i] = data.get(i);
+        }
+
+        // Clean up
+        Assimp.aiReleaseImport(scene);
+
+        return result;
+    }
+
     public static float[] trisFromObj(Path pPath) {
         List<Float> faces = new ArrayList<>();
         try {

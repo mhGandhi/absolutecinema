@@ -1,7 +1,7 @@
 package net.absolutecinema.rendering;
 
 import net.absolutecinema.rendering.shader.FieldType;
-import net.absolutecinema.rendering.shader.ProgramLinkingException;
+import net.absolutecinema.rendering.shader.programs.ProgramLinkingException;
 import net.absolutecinema.rendering.shader.ShaderCompilationException;
 import net.absolutecinema.rendering.shader.ShaderType;
 import org.joml.Matrix4f;

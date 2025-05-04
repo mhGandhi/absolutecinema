@@ -1,9 +1,8 @@
 package net.absolutecinema.rendering;
 
 import net.absolutecinema.rendering.shader.Shader;
-import net.absolutecinema.rendering.shader.ShaderProgram;
+import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
-import net.absolutecinema.rendering.shader.Simple3DShader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,12 +20,19 @@ public class ShaderManager {
         shaders = new HashMap<>();
     }
 
-    public void loadShader(String pSourceName, ShaderProgram pToLoad){
-        try {
-            shaders.put(pSourceName, shaderFromFileName(pSourceName, pToLoad));
-        }catch (Exception e){
-            e.printStackTrace(LOGGER.getErrorStream());
+    public ShaderProgram loadShader(String pSourceName, ShaderProgram pToLoad){
+        if(!shaders.containsKey(pSourceName)) {
+            try {
+                shaders.put(pSourceName, shaderFromFileName(pSourceName, pToLoad));
+            } catch (Exception e) {
+                e.printStackTrace(LOGGER.getErrorStream());
+                return null;
+            }
+        }else{
+            LOGGER.warn("Shader ["+pSourceName+"] already loaded - returning existing one");//todo overwrite existing and check from outside
         }
+
+        return shaders.get(pSourceName);
     }
 
     private ShaderProgram shaderFromFileName(String pFileName, ShaderProgram pTarget) throws IOException {

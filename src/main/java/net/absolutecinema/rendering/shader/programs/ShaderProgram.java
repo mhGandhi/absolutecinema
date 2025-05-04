@@ -1,8 +1,9 @@
-package net.absolutecinema.rendering.shader;
+package net.absolutecinema.rendering.shader.programs;
 
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.meshes.Mesh;
+import net.absolutecinema.rendering.shader.*;
 
 import java.util.*;
 
@@ -99,11 +100,7 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         }
         shaders.clear();
 
-        String[] className =this.getClass().toString().split("\\.");
-        LOGGER.info(
-                "<"+className[className.length-1]+"> linked with layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
-                +"and uniforms:\n"+Uni.uniMapToString(uniforms)
-        );
+        LOGGER.info("LINKED " + this.toString());
     }
 
     protected void assignUnis() {
@@ -139,5 +136,13 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         }
 
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        String[] className =this.getClass().toString().split("\\.");
+        return
+                "<"+className[className.length-1]+"> layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
+                        +"uniforms:\n"+Uni.uniMapToString(uniforms);
     }
 }
