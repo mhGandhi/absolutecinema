@@ -20,14 +20,18 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GraphicsWrapper {
-    private static int boundVBO;
-    private static int boundVAO;
+    private static int boundVBO = -1;
+    private static int boundVAO = -1;
+    private static long contextWindow = -1;
 
     public static int getBoundVAO() {
         return boundVAO;
     }
     public static int getBoundVBO(){
         return boundVBO;
+    }
+    public static long getContextWindow(){
+        return contextWindow;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////SHADER
@@ -103,6 +107,7 @@ public class GraphicsWrapper {
         return id;
     }
     public static void makeWinContextCurrent(long pId){
+        contextWindow = pId;
         glfwMakeContextCurrent(pId);
     }
     public static void createCapabilities(){

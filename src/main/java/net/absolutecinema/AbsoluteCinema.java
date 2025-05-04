@@ -23,6 +23,7 @@ public class AbsoluteCinema {
     public static AbsoluteCinema instance = null;
     public static Logger LOGGER = null;
     public static GameConfig config;
+    public static Options options;
 
     private boolean running;
     private Window window;
@@ -49,6 +50,7 @@ public class AbsoluteCinema {
         instance = this;
         LOGGER = new Logger();
         config = pConfig;
+        options = new Options();//todo load from file
 
         this.running = false;
         this.window = null;
@@ -175,6 +177,9 @@ public class AbsoluteCinema {
             objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }
 
+        {//setUp options
+            options.setFpsCap(Integer.MAX_VALUE);
+        }
     }
 
     private void loop() {
@@ -209,16 +214,23 @@ public class AbsoluteCinema {
                 timer += 1.0;
             }
 
-            // FPS limiter
-            double endTime = glfwGetTime();
-            double frameDuration = endTime - frameStartTime;
-            double sleepTime = 1.0/65 - frameDuration;
+            if(options.getTargetFrameTime()>0){
+                if(window.vsyncEnabled())window.disableVsync();
 
-            if (sleepTime > 0) {
-                try {
-                    Thread.sleep((long)(sleepTime * 1000)); // convert to ms
-                } catch (InterruptedException ignored) {}
+                // FPS limiter
+                double endTime = glfwGetTime();
+                double frameDuration = endTime - frameStartTime;
+                double sleepTime = options.getTargetFrameTime() - frameDuration;
+
+                if (sleepTime > 0) {
+                    try {
+                        Thread.sleep((long)(sleepTime * 1000)); // convert to ms
+                    } catch (InterruptedException ignored) {}
+                }
+            }else{
+                if(!window.vsyncEnabled())window.enableVsync();
             }
+
         }
     }
 
