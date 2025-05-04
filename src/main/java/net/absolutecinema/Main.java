@@ -5,7 +5,11 @@ import java.io.File;
 public class Main {
     public static void main(String[] args) {
         GameConfig config;
-        config = new GameConfig(new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\workingDirectory"), new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\assets"));
+        config = new GameConfig(
+                new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\workingDirectory"),
+                new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\assets"),
+                "shader"
+        );
 
         AbsoluteCinema absoluteCinema = new AbsoluteCinema(config);
 
