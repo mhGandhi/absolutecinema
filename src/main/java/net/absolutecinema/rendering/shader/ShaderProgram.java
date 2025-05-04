@@ -2,6 +2,7 @@ package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
+import net.absolutecinema.rendering.UniformType;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,8 +25,8 @@ public class ShaderProgram extends GLObject {
         uniforms = new HashMap<>();
     }
 
-    public Uni<?> addUni(CharSequence pName){
-        Uni<?> uniform = new Uni<>(this, pName);
+    public Uni<?> addUni(CharSequence pName, Object initVal){
+        Uni<?> uniform = new Uni<>(this, pName, initVal);
         uniforms.put((String)pName, uniform);
         return uniform;
     }

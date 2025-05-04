@@ -1,5 +1,8 @@
 package net.absolutecinema;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
 public class Constants {
     public static final String SHADER_FOLDER_NAME = "shader";
 
@@ -7,4 +10,7 @@ public class Constants {
     public static final String MODEL_MAT_UNI = "modelMat";
     public static final String PROJECTION_MAT_UNI = "projectionMat";
     public static final String CAMERA_POS_UNI = "cameraPos";
+
+    public static final Matrix4f IDENTITY_4F = new Matrix4f().identity();
+    public static final Vector3f ZERO_VEC3F = new Vector3f().zero();
 }

@@ -148,10 +148,10 @@ public class AbsoluteCinema {
 
             shaderProgram.use();
 
-            viewMat = new Uni<>(shaderProgram, Constants.VIEW_MAT_UNI);
-            projectionMat = new Uni<>(shaderProgram, Constants.PROJECTION_MAT_UNI);
-            modelMat = new Uni<>(shaderProgram, Constants.MODEL_MAT_UNI);
-            cameraPosVec = new Uni<>(shaderProgram, Constants.CAMERA_POS_UNI);
+            viewMat = new Uni<>(shaderProgram, Constants.VIEW_MAT_UNI, Constants.IDENTITY_4F);
+            projectionMat = new Uni<>(shaderProgram, Constants.PROJECTION_MAT_UNI, Constants.IDENTITY_4F);
+            modelMat = new Uni<>(shaderProgram, Constants.MODEL_MAT_UNI, Constants.IDENTITY_4F);
+            cameraPosVec = new Uni<>(shaderProgram, Constants.CAMERA_POS_UNI, Constants.ZERO_VEC3F);
         }
 
         //setUp cam
