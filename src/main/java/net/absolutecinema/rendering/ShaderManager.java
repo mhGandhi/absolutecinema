@@ -3,7 +3,7 @@ package net.absolutecinema.rendering;
 import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
-import net.absolutecinema.rendering.shader.StaticShaderPrg;
+import net.absolutecinema.rendering.shader.Simple3DShader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,15 +21,15 @@ public class ShaderManager {
         shaders = new HashMap<>();
     }
 
-    public void loadShader(String pName){
+    public void loadShader(String pSourceName, ShaderProgram pToLoad){
         try {
-            shaders.put(pName, newShaderFromFileName(pName));
+            shaders.put(pSourceName, shaderFromFileName(pSourceName, pToLoad));
         }catch (Exception e){
             e.printStackTrace(LOGGER.getErrorStream());
         }
     }
 
-    private ShaderProgram newShaderFromFileName(String pFileName) throws IOException {
+    private ShaderProgram shaderFromFileName(String pFileName, ShaderProgram pTarget) throws IOException {
         Path shaderpath = config.assetDirectory().toPath().resolve(SHADER_FOLDER_NAME);
 
         if (!Files.isDirectory(shaderpath)) {
@@ -49,9 +49,9 @@ public class ShaderManager {
                     .toList();
         }
 
-        ShaderProgram ret = new StaticShaderPrg();
+        //ShaderProgram ret = new Simple3DShader();
         for (Path sh : indShaders){
-            ret.attach(
+            pTarget.attach(
                     new Shader(
                             ShaderType.byPath(sh),
                             Files.readString(sh)
@@ -59,9 +59,9 @@ public class ShaderManager {
             );
         }
 
-        ret.linkAndClearShaders();
+        pTarget.linkAndClearShaders();
 
-        return ret;
+        return pTarget;
     }
 
     public ShaderProgram getShaderProgram(String pKey){

@@ -4,8 +4,8 @@ import net.absolutecinema.Constants;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class StaticShaderPrg extends ShaderProgram{
-    public StaticShaderPrg(){//todo replace with class dynamically generating fields from file
+public class Simple3DShader extends ShaderProgram{
+    public Simple3DShader(){//todo replace with class dynamically generating fields from file
 
     }
 
