@@ -7,8 +7,7 @@ public class Main {
         GameConfig config;
         config = new GameConfig(
                 new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\workingDirectory"),
-                new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\assets"),
-                "shader"
+                new File("C:\\Users\\rando\\IdeaProjects\\absolutecinema\\assets")
         );
 
         AbsoluteCinema absoluteCinema = new AbsoluteCinema(config);

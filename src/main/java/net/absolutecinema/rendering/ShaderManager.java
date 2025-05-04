@@ -1,21 +1,17 @@
 package net.absolutecinema.rendering;
 
-import net.absolutecinema.AbsoluteCinema;
 import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
-import org.lwjgl.system.MemoryUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 import static net.absolutecinema.AbsoluteCinema.config;
+import static net.absolutecinema.Constants.SHADER_FOLDER_NAME;
 
 public class ShaderManager {
     private final Map<String, ShaderProgram> shaders;
@@ -33,7 +29,7 @@ public class ShaderManager {
     }
 
     private ShaderProgram newShaderFromFileName(String pFileName) throws IOException {
-        Path shaderpath = config.assetDirectory().toPath().resolve(config.shaderFolderName());
+        Path shaderpath = config.assetDirectory().toPath().resolve(SHADER_FOLDER_NAME);
 
         if (!Files.isDirectory(shaderpath)) {
             throw new IllegalArgumentException("Provided path is not a directory: " + shaderpath);
