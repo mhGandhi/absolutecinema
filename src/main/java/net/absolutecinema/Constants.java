@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 public class Constants {
     public static final String SHADER_FOLDER_NAME = "shader";
 
-    public static final String TESTING_SHADER_NAME = "norm";
+    public static final String TESTING_SHADER_NAME = "default";
 
     public static final String VIEW_MAT_UNI = "viewMat";
     public static final String MODEL_MAT_UNI = "modelMat";
