@@ -15,12 +15,11 @@ public class Main {
         absoluteCinema.run();
     }
     /*todo
-    LOGGER
-    MESH (DIFFERENT KINDS)
-    MORE SOLID VToV fields
     (TEXTURE)
     Auto decide Mesh type
-    Model Class (interface?) for static ones, groups etc
     Gridlines
+
+    GAME:
+        RNG with seed
     */
 }
