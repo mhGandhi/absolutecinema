@@ -7,6 +7,7 @@ import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.Window;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.shader.ShaderProgram;
+import net.absolutecinema.rendering.shader.StaticShaderPrg;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -139,14 +140,14 @@ public class AbsoluteCinema {
         //setUp shader
         {
             shaderManager.loadShader("norm");
-            ShaderProgram shaderProgram = shaderManager.getShaderProgram("norm");
+            StaticShaderPrg shaderProgram = (StaticShaderPrg) shaderManager.getShaderProgram("norm");
 
             shaderProgram.use();
 
-            viewMat = new Uni<>(shaderProgram, Constants.VIEW_MAT_UNI, Constants.IDENTITY_4F);
-            projectionMat = new Uni<>(shaderProgram, Constants.PROJECTION_MAT_UNI, Constants.IDENTITY_4F);
-            modelMat = new Uni<>(shaderProgram, Constants.MODEL_MAT_UNI, Constants.IDENTITY_4F);
-            cameraPosVec = new Uni<>(shaderProgram, Constants.CAMERA_POS_UNI, Constants.ZERO_VEC3F);
+            viewMat = shaderProgram.viewMat;
+            projectionMat = shaderProgram.projMat;
+            modelMat = shaderProgram.modelMat;
+            cameraPosVec = shaderProgram.camPos;
         }
 
         //setUp cam
@@ -176,34 +177,58 @@ public class AbsoluteCinema {
 
     }
 
-    private void loop(){
+    private void loop() {
         int frames = 0;
         double timer = glfwGetTime();
-        frameCount++;
+        double lastTime = glfwGetTime();
+        double deltaTime = 0;
 
-        while(this.running){
-            frame();
+        while (this.running) {
+            double frameStartTime = glfwGetTime();
+            deltaTime = frameStartTime - lastTime;
+            lastTime = frameStartTime;
 
-            double currentTime = glfwGetTime();
+            frame(deltaTime);
+
             frames++;
-            if (currentTime - timer >= 1.0) {
+            if (frameStartTime - timer >= 1.0) {
                 long totalMemory = runtime.totalMemory();
                 long freeMemory = runtime.freeMemory();
                 long usedMemory = totalMemory - freeMemory;
+                double frameTimeMs = deltaTime * 1000.0;
 
-                window.setTitle("ABSOLUTE CINEMA - "+frames+" fps - "+usedMemory/(1024*1024)+"/"+totalMemory/(1024*1024)+" MB");
+                window.setTitle(String.format(
+                        "ABSOLUTE CINEMA - %d fps - %.2f ms - %d/%d MB",
+                        frames,
+                        frameTimeMs,
+                        usedMemory / (1024 * 1024),
+                        totalMemory / (1024 * 1024)
+                ));
+
                 frames = 0;
                 timer += 1.0;
             }
+
+            // FPS limiter
+            double endTime = glfwGetTime();
+            double frameDuration = endTime - frameStartTime;
+            double sleepTime = 1.0/65 - frameDuration;
+
+            if (sleepTime > 0) {
+                try {
+                    Thread.sleep((long)(sleepTime * 1000)); // convert to ms
+                } catch (InterruptedException ignored) {}
+            }
         }
     }
+
 
     private void terminate(){
         GraphicsWrapper.terminate();
         Buffers.freeAll();
     }
 
-    private void frame(){
+    private void frame(double pDeltaTime){
         GraphicsWrapper.clearWin();
         frameCount++;
         GraphicsWrapper.pollEvents();
@@ -214,8 +239,8 @@ public class AbsoluteCinema {
         viewMat.set(cam.getViewMatrix());
         cameraPosVec.set(cam.getPos());
 
-        manYaw += 0.00001f;
-        manPos.add(0,0,0.0002f);
+        manYaw += (float) (0.3f*pDeltaTime);
+        manPos.add(0, 0, (float) (1f*pDeltaTime));
         objModels.get(1).setPos(manPos);
         objModels.get(0).setRotation(0, manYaw, 0);
 
