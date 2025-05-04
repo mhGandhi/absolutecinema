@@ -27,22 +27,31 @@ public class Logger {
     }
 
     public void debug(String pDebug){
-        System.out.println("[DBG] "+pDebug);
+        System.out.println(withPrefixOnEachLine("[DBG] ", pDebug));
     }
 
     public void info(String pInfo){
-        System.out.println("[INF] "+pInfo);
+        System.out.println(withPrefixOnEachLine("[INF] ", pInfo));
     }
 
     public void warn(String pWarn){
-        System.out.println("[WRN] "+pWarn);
+        System.out.println(withPrefixOnEachLine("[WRN] ", pWarn));
     }
 
     public void err(String pErr){
-        System.err.println("[ERR] "+pErr);
+        System.err.println(withPrefixOnEachLine("[ERR] ", pErr));
     }
 
-    public void fatal(String pErr){
-        System.err.println("[FAT] "+pErr);
+    public void fatal(String pFatal){
+        System.err.println(withPrefixOnEachLine("[FAT] ", pFatal));
     }
+
+    public String withPrefixOnEachLine(String pPrefix, String pContent) {
+        String ret = pContent.lines()
+                .map(line -> pPrefix + line)
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+        return ret+"\n";
+    }
+
 }
