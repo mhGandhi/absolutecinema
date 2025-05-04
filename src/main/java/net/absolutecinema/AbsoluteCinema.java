@@ -69,6 +69,11 @@ public class AbsoluteCinema {
     }
 
     private void init(){
+        {//setUp options
+            options.setFpsCap(Integer.MAX_VALUE);
+            options.setFov(90);
+        }
+
         GraphicsWrapper.setErrorPrintStream(LOGGER.getErrorStream());
         GraphicsWrapper.init();
 
@@ -157,7 +162,7 @@ public class AbsoluteCinema {
             cam = new Camera();
 
             viewMat.set(cam.getViewMatrix());
-            projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(90.0f), ((float) 800 / (float) 600), 0.1f, 100.0f));
+            projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.1f, 100.0f));
             modelMat.set(new Matrix4f().identity());
             cameraPosVec.set(cam.getPos());
         }
@@ -175,10 +180,6 @@ public class AbsoluteCinema {
                 objModels.add(new Model(m, shaderProgram, filename.equals("man")?objModels.get(0):null, modelMat));
             }
             objModels.get(0).setPos(new Vector3f(-10,-10,-10));
-        }
-
-        {//setUp options
-            options.setFpsCap(Integer.MAX_VALUE);
         }
     }
 
@@ -214,7 +215,8 @@ public class AbsoluteCinema {
                 timer += 1.0;
             }
 
-            if(options.getTargetFrameTime()>0){
+
+            if(options.getTargetFrameTime()>0){//todo central option monitoring with caching
                 if(window.vsyncEnabled())window.disableVsync();
 
                 // FPS limiter
@@ -230,7 +232,6 @@ public class AbsoluteCinema {
             }else{
                 if(!window.vsyncEnabled())window.enableVsync();
             }
-
         }
     }
 
