@@ -5,7 +5,7 @@ import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.Window;
-import net.absolutecinema.rendering.shader.programs.Simple3DShader;
+import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -145,9 +145,9 @@ public class AbsoluteCinema {
 
         //setUp shader
         {
-            Simple3DShader shaderProgram =
-                    (Simple3DShader) shaderManager.loadShader(
-                            "norm", new Simple3DShader()
+            DefaultObjShader shaderProgram =
+                    (DefaultObjShader) shaderManager.loadShader(
+                            "norm", new DefaultObjShader()
                     );//shader loading only once
 
             shaderProgram.use();

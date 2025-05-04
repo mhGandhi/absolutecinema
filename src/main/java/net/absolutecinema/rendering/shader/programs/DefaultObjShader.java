@@ -7,7 +7,7 @@ import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class Simple3DShader extends ModelShader {
+public class DefaultObjShader extends ModelShader {
     //todo replace with class dynamically generating fields from file
 
     @Override
