@@ -3,6 +3,7 @@ package net.absolutecinema;
 import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.Camera;
 import net.absolutecinema.rendering.GraphicsWrapper;
+import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.Window;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.meshes.VertexNormalMesh;
@@ -25,13 +26,14 @@ import static org.lwjgl.opengl.GL11.*;
 public class AbsoluteCinema {
     public static AbsoluteCinema instance = null;
     public static Logger LOGGER = null;
+    public static GameConfig config;
 
     private boolean running;
     private Window window;
     private long frameCount;
 
-    private final GameConfig config;
-    private final Runtime runtime;
+    public final Runtime runtime;
+    private final ShaderManager shaderManager;
 
 //////////////////////////////////////////////////
     Uni<Matrix4f> viewMat;
@@ -50,13 +52,14 @@ public class AbsoluteCinema {
     public AbsoluteCinema(final GameConfig pConfig){
         instance = this;
         LOGGER = new Logger();
+        config = pConfig;
 
         this.running = false;
         this.window = null;
         frameCount = 0;
 
-        config = pConfig;
         runtime = Runtime.getRuntime();
+        shaderManager = new ShaderManager();
     }
 
     public void run(){
@@ -138,20 +141,11 @@ public class AbsoluteCinema {
         glDepthFunc(GL_LESS);//todo
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);//todo
 
-        ShaderProgram shaderProgram;
         //setUp shader
         {
-            shaderProgram = new ShaderProgram();
-            Path shaderpath = config.assetDirectory().toPath().resolve("shader");
-            try{
-                Shader vsh = new Shader(ShaderType.VERTEX, Files.readString(shaderpath.resolve("shader.vert")));
-                Shader fsh = new Shader(ShaderType.FRAGMENT, Files.readString(shaderpath.resolve("shader.frag")));
-                shaderProgram.attach(vsh);
-                shaderProgram.attach(fsh);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            shaderProgram.linkAndClearShaders();
+            shaderManager.loadShader("norm");
+            ShaderProgram shaderProgram = shaderManager.getShaderProgram("norm");
+
             shaderProgram.use();
 
             viewMat = new Uni<>(shaderProgram, "view");
@@ -178,7 +172,7 @@ public class AbsoluteCinema {
                 float[] vertices = Util.trisFromObj(config.assetDirectory().toPath().resolve("models").resolve(filename+".obj"));
                 Mesh m = new VertexNormalMesh();
                 m.assignVertices(vertices);
-                objModels.add(new Model(m, shaderProgram, filename.equals("man")?objModels.get(0):null, modelMat));
+                objModels.add(new Model(m, shaderManager.getShaderProgram("norm"), filename.equals("man")?objModels.get(0):null, modelMat));
             }
             objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }
@@ -188,6 +182,7 @@ public class AbsoluteCinema {
     private void loop(){
         int frames = 0;
         double timer = glfwGetTime();
+        frameCount++;
 
         while(this.running){
             frame();
