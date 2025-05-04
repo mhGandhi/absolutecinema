@@ -7,6 +7,7 @@ import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.Window;
 import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
 import net.absolutecinema.rendering.shader.Uni;
+import net.absolutecinema.rendering.shader.programs.ModelShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -147,7 +148,7 @@ public class AbsoluteCinema {
         {
             DefaultObjShader shaderProgram =
                     (DefaultObjShader) shaderManager.loadShader(
-                            "norm", new DefaultObjShader()
+                            Constants.TESTING_SHADER_NAME, new DefaultObjShader()
                     );//shader loading only once
 
             shaderProgram.use();
@@ -171,9 +172,11 @@ public class AbsoluteCinema {
         {
             objModels = new LinkedList<>();
             String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
+            ModelShader shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.TESTING_SHADER_NAME);
             for(String filename : meshPaths){
+
                 Path objPath = config.assetDirectory().toPath().resolve("models").resolve(filename+".obj");
-                Model add = Model.fromFile(objPath);
+                Model add = Model.fromFile(objPath, shaderProgram);
 
                 if(filename.equals("man")){
                     add.setParent(objModels.get(0));
