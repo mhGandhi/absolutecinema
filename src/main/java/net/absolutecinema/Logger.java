@@ -3,7 +3,7 @@ package net.absolutecinema;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class Logger {
+public class Logger {//todo
     private final PrintStream errorStream;
 
     public Logger() {
