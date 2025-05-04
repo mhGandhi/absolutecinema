@@ -5,6 +5,7 @@ import net.absolutecinema.rendering.GraphicsWrapper;
 
 public class Shader extends GLObject implements AutoCloseable {
     public final ShaderType type;
+    private String source;
 
     public Shader(ShaderType pShaderType, String pSourceCode){
         super(GraphicsWrapper.createShader(pShaderType));
@@ -14,7 +15,12 @@ public class Shader extends GLObject implements AutoCloseable {
     }
 
     private void upload(String pSourceCode){
+        this.source = pSourceCode;
         GraphicsWrapper.uploadSourceToShader(this.id, pSourceCode);
+    }
+
+    public String getSource(){
+        return this.source;
     }
 
     private void compile(){
