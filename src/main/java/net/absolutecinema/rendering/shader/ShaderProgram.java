@@ -3,8 +3,10 @@ package net.absolutecinema.rendering.shader;
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
@@ -12,16 +14,24 @@ public class ShaderProgram extends GLObject {
     private boolean linked;
 
     private List<Shader> shaders;
+    private Map<String, Uni<?>> uniforms;
 
     public ShaderProgram(){
         super(GraphicsWrapper.createProgram());
         linked = false;
 
         shaders = new LinkedList<>();
+        uniforms = new HashMap<>();
     }
 
-    public Uni<?> getUni(CharSequence pName){
-        return new Uni<>(this, pName);
+    public Uni<?> addUni(CharSequence pName){
+        Uni<?> uniform = new Uni<>(this, pName);
+        uniforms.put((String)pName, uniform);
+        return uniform;
+    }
+
+    public Uni<?> getUni(String pUniKey){
+        return uniforms.get(pUniKey);
     }
 
     public void attach(Shader pShader){

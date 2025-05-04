@@ -1,5 +1,6 @@
 package net.absolutecinema.rendering;
 
+import net.absolutecinema.rendering.shader.FieldType;
 import net.absolutecinema.rendering.shader.ProgramLinkingException;
 import net.absolutecinema.rendering.shader.ShaderCompilationException;
 import net.absolutecinema.rendering.shader.ShaderType;
@@ -47,19 +48,6 @@ public class GraphicsWrapper {
     }
     public static void deleteShader(int pShaderId){
         GL33.glDeleteShader(pShaderId);
-    }
-    public static int shaderTypeToInt(ShaderType pType){
-        switch (pType){
-            case VERTEX -> {
-                return GL33.GL_VERTEX_SHADER;
-            }
-            case FRAGMENT -> {
-                return GL33.GL_FRAGMENT_SHADER;
-            }
-            default -> {
-                return -1;//todo exceptions
-            }
-        }
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////PROGRAM
     public static int createProgram(){
@@ -178,8 +166,8 @@ public class GraphicsWrapper {
     }
 
     //todo ka wie man das nennt
-    public static void assignVToV(int pIndex, int pSize, boolean pNormalize, int pStride, int pOffset){
-        GL33.glVertexAttribPointer(pIndex, pSize, GL33.GL_FLOAT, pNormalize, pStride * Float.BYTES, (long) pOffset * Float.BYTES);
+    public static void assignVToV(int pIndex, int pSize, boolean pNormalize, int pStride, int pOffset, FieldType pType){
+        GL33.glVertexAttribPointer(pIndex, pSize, fieldTypeToInt(pType), pNormalize, pStride * pType.bytes, (long) pOffset * pType.bytes);
     }
     public static void enableVToV(int pIndex){
         GL33.glEnableVertexAttribArray(pIndex);
@@ -201,5 +189,36 @@ public class GraphicsWrapper {
     }
     public static void setErrorPrintStream(PrintStream pPS){
         GLFWErrorCallback.createPrint(pPS).set();
+    }
+
+
+    public static int shaderTypeToInt(ShaderType pType){
+        switch (pType){
+            case VERTEX -> {
+                return GL33.GL_VERTEX_SHADER;
+            }
+            case FRAGMENT -> {
+                return GL33.GL_FRAGMENT_SHADER;
+            }
+            default -> {
+                return -1;//todo exceptions
+            }
+        }
+    }
+    public static int fieldTypeToInt(FieldType pType){
+        switch (pType){
+            case FLOAT -> {
+                return GL_FLOAT;
+            }
+            case INTEGER -> {
+                return GL_INT;
+            }
+            case BYTE -> {
+                return GL_BYTE;
+            }
+            default -> {
+                return -1;
+            }
+        }
     }
 }

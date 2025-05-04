@@ -1,6 +1,7 @@
 package net.absolutecinema.rendering.meshes;
 
 import net.absolutecinema.rendering.GraphicsWrapper;
+import net.absolutecinema.rendering.shader.FieldType;
 
 import java.nio.FloatBuffer;
 
@@ -32,7 +33,7 @@ public class BufferWrapper {
         //MemoryUtil.memFree(pBuffer);
     }
 
-    public void addField(int pSize, boolean pNormalize){
+    public void addField(int pSize, FieldType pType, boolean pNormalize){
         if(lastOffset==this.stride){
             LOGGER.warn("Fields already full ("+stride+"/"+stride+") - returning");
             return;
@@ -44,7 +45,7 @@ public class BufferWrapper {
         vao.bind();
         vbo.bind();
         lastIndex++;
-        GraphicsWrapper.assignVToV(lastIndex, pSize, pNormalize, this.stride, lastOffset);
+        GraphicsWrapper.assignVToV(lastIndex, pSize, pNormalize, this.stride, lastOffset, pType);
         lastOffset+=pSize;
         GraphicsWrapper.enableVToV(lastIndex);
     }
