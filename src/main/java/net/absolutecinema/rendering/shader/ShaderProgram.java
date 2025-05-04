@@ -25,22 +25,38 @@ public class ShaderProgram extends GLObject {
     }
 
     public void attach(Shader pShader){
-        //boolean alreadyExists = shaders.stream()
-        //        .anyMatch(shader -> shader.type.equals(pShader.type));
+        for(Shader s : shaders){
+            if(s.type == pShader.type){
+                LOGGER.err("Shader of Type ["+s.type+"] already attached - returning");
+                return;
+            }
+        }
 
-        //if(alreadyExists){
-        //    LOGGER.err("Shader of type ["+pShader.type+"] already attached; not attaching ["+pShader.id+"]");
-        //}else{
-        //    shaders.add(pShader);
-        //}
         GraphicsWrapper.attachShader(this.id, pShader.id);
         shaders.add(pShader);
     }
 
+    public void detach(Shader pShader){
+        if(linked){
+            LOGGER.err("ShaderProgram already linked; can not detach ["+pShader+"] - returning");
+            return;
+        }
+
+        if(!shaders.contains(pShader)){
+            LOGGER.err("Shader ["+pShader+"] not attached - returning");
+            return;
+        }
+
+        GraphicsWrapper.detachShader(this.id, pShader.id);
+        shaders.remove(pShader);
+    }
+
     public void linkAndClearShaders(){
-        //for(Shader shader : shaders){
-        //    OpenGLWrapper.attachShader(this.id, shader.id);
-        //}
+        if(linked) {
+            LOGGER.err("ShaderProgram ["+this+"] already linked - returning");
+            return;
+        }
+
         try{
             GraphicsWrapper.linkProgram(this.id);
         }catch(ProgramLinkingException e){
@@ -54,7 +70,7 @@ public class ShaderProgram extends GLObject {
         }
     }
 
-    public boolean getLinked(){
+    public boolean isLinked(){
         return this.linked;
     }
 
