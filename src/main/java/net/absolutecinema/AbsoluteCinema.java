@@ -1,13 +1,11 @@
 package net.absolutecinema;
 
 import net.absolutecinema.models.Model;
-import net.absolutecinema.rendering.Camera;
-import net.absolutecinema.rendering.GraphicsWrapper;
-import net.absolutecinema.rendering.ShaderManager;
-import net.absolutecinema.rendering.Window;
+import net.absolutecinema.rendering.*;
 import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
 import net.absolutecinema.rendering.shader.Uni;
 import net.absolutecinema.rendering.shader.programs.ModelShader;
+import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -38,6 +36,7 @@ public class AbsoluteCinema {
     Uni<Matrix4f> modelMat;
     Uni<Vector3f> cameraPosVec;
     List<Model> objModels;
+    Texture testTexture;
 
     Camera cam;
     double lastX = Double.MAX_VALUE;
@@ -144,13 +143,14 @@ public class AbsoluteCinema {
         glDepthFunc(GL_LESS);//todo
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);//todo
 
-        //setUp shader
+        //setUp shader todo smart selection with capabilities enum or sth - getting from manager
         {
-            DefaultObjShader shaderProgram =
-                    (DefaultObjShader) shaderManager.loadShader(
-                            Constants.TESTING_SHADER_NAME, new DefaultObjShader()
+            TexturedObjShader shaderProgram =
+                    (TexturedObjShader) shaderManager.loadShader(
+                            Constants.TESTING_SHADER_NAME, new TexturedObjShader()
                     );//shader loading only once
-
+            if(shaderProgram == null)throw new NullPointerException("SOMETHING WENT WRONG LOADING SHADER");
+            //todo save unis somewhere else so view etc can be applied on shaders of all unis
             shaderProgram.use();
 
             viewMat = shaderProgram.viewMat;
@@ -168,10 +168,11 @@ public class AbsoluteCinema {
             cameraPosVec.set(cam.getPos());
         }
 
+        testTexture = new Texture(config.assetDirectory().toPath().resolve("textures/monkey.png"));
         //setUp objects
         {
             objModels = new LinkedList<>();
-            String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
+            String[] meshPaths = {/*"mountains","man",*/"cube","cube"/*,"axis","ship","teapotN"*/};
             ModelShader shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.TESTING_SHADER_NAME);
             for(String filename : meshPaths){
 
@@ -183,7 +184,7 @@ public class AbsoluteCinema {
                 }
                 objModels.add(add);
             }
-            objModels.get(0).setPos(new Vector3f(-10,-10,-10));
+            //objModels.get(0).setPos(new Vector3f(-10,-10,-10));
         }
     }
 

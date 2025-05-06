@@ -100,6 +100,9 @@ public class Model {
         boolean hasNormals = mesh.mNormals() != null;
         boolean hasTexCoords = mesh.mTextureCoords(0) != null;
 
+        //System.out.println("norm "+hasNormals);
+        //System.out.println("tex "+hasTexCoords);
+
         ModelShader shaderProgram;
         if(pShader != null){
             shaderProgram = pShader;
@@ -123,7 +126,7 @@ public class Model {
         AIVector3D.Buffer vertices = pMesh.mVertices();
         AIVector3D.Buffer normals = pMesh.mNormals();
         AIFace.Buffer faces = pMesh.mFaces();
-//        PointerBuffer uv = pMesh.mTextureCoords();
+        AIVector3D.Buffer texCoords = pMesh.mTextureCoords(0); // 0 = first set of UVs
 
         for (int j = 0; j < faces.remaining(); j++) {
             AIFace face = faces.get(j);
@@ -150,12 +153,12 @@ public class Model {
                         data.add(normal.z());
                         continue;
                     }
-//                    if(le.name().equals(Constants.UV_COORDINATE_LAYOUT_FIELD)){//todo
-//                        AIVector2D uvV = uv.get(index);
-//                        data.add(uv.x());
-//                        data.add(uv.y());
-//                        continue;
-//                    }
+                    if(le.name().equals(Constants.UV_COORDINATE_LAYOUT_FIELD)) {
+                        AIVector3D uvV = texCoords.get(index);
+                        data.add(uvV.x());
+                        data.add(uvV.y());
+                        continue;
+                    }
                 }
             }
         }

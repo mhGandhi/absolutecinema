@@ -17,6 +17,7 @@ import java.nio.FloatBuffer;
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GraphicsWrapper {
@@ -93,6 +94,10 @@ public class GraphicsWrapper {
         }
         if(pValue instanceof Vector3f v3f){
             GL33.glUniform3f(pLocation, v3f.x, v3f.y, v3f.z);
+            return;
+        }
+        if(pValue instanceof Texture tex){
+            glUniform1i(pLocation, tex.id);
             return;
         }
     }
@@ -196,7 +201,11 @@ public class GraphicsWrapper {
         GLFWErrorCallback.createPrint(pPS).set();
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////TEXTURE
+    //todo
 
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////TOINT
     public static int shaderTypeToInt(ShaderType pType){
         switch (pType){
             case VERTEX -> {

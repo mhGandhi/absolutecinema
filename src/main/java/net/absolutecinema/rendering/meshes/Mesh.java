@@ -44,6 +44,10 @@ public class Mesh {
         }
     }
 
+    public ShaderProgram getShaderProgram(){
+        return this.shader;
+    }
+
     public void uploadToVBO(FloatBuffer pBuffer){
         vbo.bind();
         GraphicsWrapper.uploadToVBO(pBuffer);
@@ -79,7 +83,7 @@ public class Mesh {
     }
 
     public void draw(){
-        shader.use();//todo fix + batch up
+        getShaderProgram().use();//todo fix + batch up
         bindVAO();
         GraphicsWrapper.drawTriangles(vertCount);
     }
