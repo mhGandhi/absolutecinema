@@ -74,7 +74,6 @@ public class Model {
     }
 
     public void draw(){
-        getShaderProgram().use();//todo fix + batch up
         modelMatUni.set(getRelModelMat());
         getMesh().draw();
     }
@@ -110,7 +109,7 @@ public class Model {
         }
 
         // Load mesh
-        Mesh convertedMesh = shaderProgram.newCompatibleMesh();//todo mby store layout info within Mesh
+        Mesh convertedMesh = new Mesh(shaderProgram);
         convertedMesh.assignVertices(meshToArr(mesh, shaderProgram));
 
         Assimp.aiReleaseImport(scene);

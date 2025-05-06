@@ -3,27 +3,45 @@ package net.absolutecinema.rendering.meshes;
 import net.absolutecinema.Buffers;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.shader.FieldType;
+import net.absolutecinema.rendering.shader.LayoutEntry;
+import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 
 import java.nio.FloatBuffer;
+import java.text.CollationElementIterator;
+import java.util.Collection;
+import java.util.List;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 
 public class Mesh {
+    private final ShaderProgram shader;
+
     private final Vao vao;
     private final Vbo vbo;
-    private int lastIndex;
-    private int lastOffset;
+
+
     private final int stride;
     private int vertCount;
 
-    public Mesh(int pFieldsSize){
+    private int lastIndex;
+    private int lastOffset;
+
+    public Mesh(ShaderProgram pShaderProgram){
+        this.shader = pShaderProgram;
+
         vao = new Vao();
         vbo = new Vbo();
-        lastIndex = -1;
+
         vertCount = 0;
+        this.stride = pShaderProgram.getStride();
+
+        lastIndex = -1;
         lastOffset = 0;
 
-        this.stride = pFieldsSize;
+        //init layout
+        for(LayoutEntry le : pShaderProgram.getLayout()){
+            addField(le.size(), le.type(), le.normalize());
+        }
     }
 
     public void uploadToVBO(FloatBuffer pBuffer){
@@ -61,6 +79,7 @@ public class Mesh {
     }
 
     public void draw(){
+        shader.use();//todo fix + batch up
         bindVAO();
         GraphicsWrapper.drawTriangles(vertCount);
     }

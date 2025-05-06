@@ -16,6 +16,8 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
     private final Map<String, Uni<?>> uniforms;
     private final List<LayoutEntry> fieldsLayout;
 
+    private int stride;
+
     public ShaderProgram(){
         super(GraphicsWrapper.createProgram());
         linked = false;
@@ -23,6 +25,8 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         shaders = new LinkedList<>();
         uniforms = new HashMap<>();
         fieldsLayout = new LinkedList<>();
+
+        stride = -1;
     }
 
     public Uni<?> addUni(CharSequence pName, Object initVal){
@@ -49,7 +53,17 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
     }
 
     public Collection<LayoutEntry> getLayout(){
+        if(!isLinked()){
+            throw new ProgramLinkingException("Program is not yet linked - can not provide definite layout");
+        }
         return this.fieldsLayout;
+    }
+
+    public int getStride(){
+        if(!isLinked()){
+            throw new ProgramLinkingException("Program is not yet linked - can not provide definite stride");
+        }
+        return this.stride;
     }
 
     public void attach(Shader pShader){
@@ -100,11 +114,19 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         }
         shaders.clear();
 
+        {//determine stride
+            int fieldsSize = 0;
+            for(LayoutEntry le : getLayout()){
+                fieldsSize += le.size();
+            }
+            this.stride = fieldsSize;
+        }
+
         LOGGER.info("LINKED " + this.toString());
     }
 
     protected void assignUnis() {
-
+        //override here
     }
 
     public boolean isLinked(){
@@ -117,25 +139,6 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
 
     public void close(){
         GraphicsWrapper.deleteProgram(this.id);
-    }
-
-    public Mesh newCompatibleMesh(){
-        if(!isLinked()){
-            throw new ProgramLinkingException("Program is not yet linked - can not generate BufferWrapper");
-        }
-
-        int fieldsSize = 0;
-        for(LayoutEntry le : fieldsLayout){
-            fieldsSize += le.size();
-        }
-
-        Mesh ret = new Mesh(fieldsSize);
-
-        for(LayoutEntry le : fieldsLayout){
-            ret.addField(le.size(), le.type(), le.normalize());
-        }
-
-        return ret;
     }
 
     @Override
