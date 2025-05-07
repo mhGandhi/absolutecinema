@@ -164,7 +164,7 @@ public class AbsoluteCinema {
             cam = new Camera();
 
             viewMat.set(cam.getViewMatrix());
-            projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.1f, 100.0f));
+            projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
             cameraPosVec.set(cam.getPos());
         }
 
@@ -172,7 +172,7 @@ public class AbsoluteCinema {
         //setUp objects
         {
             objModels = new LinkedList<>();
-            String[] meshPaths = {/*"mountains","man",*/"cube","cube"/*,"axis","ship","teapotN"*/};
+            String[] meshPaths = {"mountains","man","cube","cube"/*,"axis","ship","teapotN"*/};
             ModelShader shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.TESTING_SHADER_NAME);
             for(String filename : meshPaths){
 

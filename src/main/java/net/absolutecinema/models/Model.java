@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.absolutecinema.AbsoluteCinema.LOGGER;
 import static net.absolutecinema.AbsoluteCinema.shaderManager;
 
 public class Model {
@@ -135,6 +136,15 @@ public class Model {
                 continue; // Skip non-triangle faces (shouldn't happen if aiProcess_Triangulate is used)
             }
 
+            boolean noNormals = normals == null;
+            boolean noTexCoords = texCoords == null;
+
+            if(noNormals){
+                LOGGER.debug("Expected normals but found none");
+            }
+            if(noTexCoords){
+                LOGGER.debug("Expected texture coordinates but found none");
+            }
 
             for (int k = 0; k < 3; k++) {
                 int index = face.mIndices().get(k);
@@ -147,6 +157,12 @@ public class Model {
                         continue;
                     }
                     if(le.name().equals(Constants.VERT_NORMAL_LAYOUT_FIELD)){
+                        if(noNormals){
+                            data.add(0f);
+                            data.add(0f);
+                            data.add(0f);
+                            continue;
+                        }
                         AIVector3D normal = normals.get(index);
                         data.add(normal.x());
                         data.add(normal.y());
@@ -154,6 +170,11 @@ public class Model {
                         continue;
                     }
                     if(le.name().equals(Constants.UV_COORDINATE_LAYOUT_FIELD)) {
+                        if(noTexCoords){
+                            data.add(0f);
+                            data.add(0f);
+                            continue;
+                        }
                         AIVector3D uvV = texCoords.get(index);
                         data.add(uvV.x());
                         data.add(uvV.y());
