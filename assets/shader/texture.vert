@@ -10,12 +10,14 @@ uniform vec3 uCameraPos;
 
 out vec3 FragPos;
 out vec3 Normal;
+out vec2 TexCoord;
 out vec3 ViewPos;
 
 void main()
 {
     FragPos = vec3(uModelMat * vec4(aPos, 1.0));
     Normal = mat3(transpose(inverse(uModelMat))) * aNormal;
+    TexCoord = aTexCoord;
     ViewPos = uCameraPos;
 
     gl_Position = uProjectionMat * uViewMat * vec4(FragPos, 1.0);

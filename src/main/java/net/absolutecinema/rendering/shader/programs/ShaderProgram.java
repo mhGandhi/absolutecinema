@@ -2,12 +2,14 @@ package net.absolutecinema.rendering.shader.programs;
 
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
+import net.absolutecinema.rendering.ShaderManager;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.shader.*;
 
 import java.util.*;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
+import static net.absolutecinema.AbsoluteCinema.shaderManager;
 
 public class ShaderProgram extends GLObject implements AutoCloseable {
     private boolean linked;
@@ -18,8 +20,10 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
 
     private int stride;
 
+
     public ShaderProgram(){
         super(GraphicsWrapper.createProgram());
+
         linked = false;
 
         shaders = new LinkedList<>();
@@ -29,13 +33,13 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         stride = -1;
     }
 
-    public Uni<?> addUni(CharSequence pName, Object initVal){
+    public Uni<?> addUni(CharSequence pKey, Object initVal){
         if(isLinked()){
             throw new UniformException("ShaderProgram already linked; can not modify uniforms");
         }
 
-        Uni<?> uniform = new Uni<>(this, pName, initVal);
-        uniforms.put((String)pName, uniform);
+        Uni<?> uniform = new Uni<>(this, pKey, initVal);
+        uniforms.put((String)pKey, uniform);
         return uniform;
     }
 
@@ -126,15 +130,12 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
     }
 
     protected void assignUnis() {
+        shaderManager.useShaderProgram(this);
         //override here
     }
 
     public boolean isLinked(){
         return this.linked;
-    }
-
-    public void use(){
-        GraphicsWrapper.useProgram(this.id);
     }
 
     public void close(){
@@ -144,8 +145,12 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
     @Override
     public String toString() {
         String[] className =this.getClass().toString().split("\\.");
-        return
-                "<"+className[className.length-1]+"> layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
-                        +"uniforms:\n"+Uni.uniMapToString(uniforms);
+        return className[className.length-1];
+    }
+
+    public String attributes(){
+        String[] className =this.getClass().toString().split("\\.");
+        return "<"+className[className.length-1]+"> layout:\n"+LayoutEntry.layoutToString(fieldsLayout)
+                +"uniforms:\n"+Uni.uniMapToString(uniforms);
     }
 }

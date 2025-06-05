@@ -2,15 +2,20 @@ package net.absolutecinema.rendering.shader;
 
 import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
+import net.absolutecinema.rendering.RenderException;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 
 import java.util.Map;
 
+import static net.absolutecinema.AbsoluteCinema.LOGGER;
+
 public class Uni<T> extends GLObject {
     public final UniformType type;
+    public final ShaderProgram program;
 
     public Uni(ShaderProgram pProgram, CharSequence pName, T startVal){
         super(GraphicsWrapper.getUniformLocation(pProgram.id, pName));
+        program = pProgram;
         if(startVal == null){
             throw new UniformException("Starting value for Uniform may not be null");
         }
@@ -22,8 +27,12 @@ public class Uni<T> extends GLObject {
         set(startVal);
     }
 
-    public void set(T pVal){
-        GraphicsWrapper.putUniformValue(this.id, pVal);
+    public void set(Object pVal){
+        try {
+            GraphicsWrapper.putUniformValue(this.program.id, this.id, pVal);
+        } catch (RenderException e) {
+            e.printStackTrace(LOGGER.getErrorStream());
+        }
     }
 
     public static String uniMapToString(Map<String, Uni<?>> pMap){

@@ -3,6 +3,7 @@ package net.absolutecinema.rendering;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL33;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
@@ -10,8 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
@@ -69,7 +69,7 @@ public class Texture extends GLObject{
     }
 
     public void bind() {
-        glActiveTexture(this.id);
+        glActiveTexture(GL_TEXTURE0);//todo
         glBindTexture(GL_TEXTURE_2D, this.id);
     }
 

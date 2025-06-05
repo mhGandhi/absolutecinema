@@ -1,11 +1,14 @@
 package net.absolutecinema.models;
 
+import net.absolutecinema.AbsoluteCinema;
 import net.absolutecinema.Constants;
 import net.absolutecinema.rendering.meshes.Mesh;
+import net.absolutecinema.rendering.meshes.TexturedMesh;
 import net.absolutecinema.rendering.shader.LayoutEntry;
 import net.absolutecinema.rendering.shader.programs.ModelShader;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 import net.absolutecinema.rendering.shader.Uni;
+import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.assimp.*;
@@ -26,7 +29,7 @@ public class Model {
 
     private final Uni<Matrix4f> modelMatUni;
 
-    public Model(Mesh pMesh, ModelShader pShader){//todo change that shit
+    private Model(Mesh pMesh, ModelShader pShader){//todo change that shit
         this.mesh = pMesh;
         this.shaderProgram = pShader;
         this.parent = null;
@@ -75,8 +78,13 @@ public class Model {
     }
 
     public void draw(){
+        draw(true);
+    }
+
+    public void draw(boolean applyShader){
+        if(applyShader) shaderManager.useShaderProgram(getShaderProgram());
         modelMatUni.set(getRelModelMat());
-        getMesh().draw();
+        getMesh().draw(false);
     }
 
     public static Model fromFile(Path pPath){
@@ -108,12 +116,25 @@ public class Model {
         if(pShader != null){
             shaderProgram = pShader;
         }else{
+            if(mesh.mTextureCoords(0)==null){
+                System.out.println("NOTEX "+pPath.toString());
+                shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.DEFAULT_MODEL_SHADER_NAME);
+            }else{
+                System.out.println("TEXTURE "+pPath.toString());
+                shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.TEXTURE_MODEL_SHADER_NAME);
+            }
             // Determine shader based on available data //todo
-            shaderProgram = null;
         }
 
         // Load mesh
-        Mesh convertedMesh = new Mesh(shaderProgram);
+        //todo
+        Mesh convertedMesh;
+        if(shaderProgram instanceof TexturedObjShader tos){
+            convertedMesh = new TexturedMesh(tos, AbsoluteCinema.testTexture);
+        }else{
+            convertedMesh = new Mesh(shaderProgram);
+        }
+
         convertedMesh.assignVertices(meshToArr(mesh, shaderProgram));
 
         Assimp.aiReleaseImport(scene);
@@ -129,21 +150,21 @@ public class Model {
         AIFace.Buffer faces = pMesh.mFaces();
         AIVector3D.Buffer texCoords = pMesh.mTextureCoords(0); // 0 = first set of UVs
 
+        boolean noNormals = normals == null;
+        boolean noTexCoords = texCoords == null;
+
+        if(noNormals){
+            LOGGER.debug("Expected normals but found none");
+        }
+        if(noTexCoords){
+            LOGGER.debug("Expected texture coordinates but found none");
+        }
+
         for (int j = 0; j < faces.remaining(); j++) {
             AIFace face = faces.get(j);
 
             if (face.mNumIndices() != 3) {
                 continue; // Skip non-triangle faces (shouldn't happen if aiProcess_Triangulate is used)
-            }
-
-            boolean noNormals = normals == null;
-            boolean noTexCoords = texCoords == null;
-
-            if(noNormals){
-                LOGGER.debug("Expected normals but found none");
-            }
-            if(noTexCoords){
-                LOGGER.debug("Expected texture coordinates but found none");
             }
 
             for (int k = 0; k < 3; k++) {

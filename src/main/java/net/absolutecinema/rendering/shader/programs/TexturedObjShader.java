@@ -7,6 +7,8 @@ import net.absolutecinema.rendering.shader.LayoutEntry;
 import net.absolutecinema.rendering.shader.Uni;
 import org.joml.Vector2f;
 
+import static org.lwjgl.opengl.GL20.glUniform1i;
+
 public class TexturedObjShader extends DefaultObjShader{
     @Override
     protected void assignUnis() {
@@ -18,4 +20,8 @@ public class TexturedObjShader extends DefaultObjShader{
     }
 
     Uni<Texture> texture;
+
+    public void setTexture(int pUnit){
+        glUniform1i(texture.id, pUnit);//todo some tex unit stuff
+    }
 }

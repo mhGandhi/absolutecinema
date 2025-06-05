@@ -2,13 +2,14 @@ package net.absolutecinema;
 
 import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.*;
-import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
 import net.absolutecinema.rendering.shader.Uni;
+import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
 import net.absolutecinema.rendering.shader.programs.ModelShader;
 import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.opengl.GL33;
 
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -30,13 +31,9 @@ public class AbsoluteCinema {
 
     public final Runtime runtime;
 
-//////////////////////////////////////////////////
-    Uni<Matrix4f> viewMat;
-    Uni<Matrix4f> projectionMat;
-    Uni<Matrix4f> modelMat;
-    Uni<Vector3f> cameraPosVec;
+    //////////////////////////////////////////////////
     List<Model> objModels;
-    Texture testTexture;
+    public static Texture testTexture;
 
     Camera cam;
     double lastX = Double.MAX_VALUE;
@@ -141,31 +138,31 @@ public class AbsoluteCinema {
 
         glEnable(GL_DEPTH_TEST);//todo
         glDepthFunc(GL_LESS);//todo
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);//todo
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);//todo
 
         //setUp shader todo smart selection with capabilities enum or sth - getting from manager
         {
-            TexturedObjShader shaderProgram =
-                    (TexturedObjShader) shaderManager.loadShader(
-                            Constants.TESTING_SHADER_NAME, new TexturedObjShader()
-                    );//shader loading only once
-            if(shaderProgram == null)throw new NullPointerException("SOMETHING WENT WRONG LOADING SHADER");
-            //todo save unis somewhere else so view etc can be applied on shaders of all unis
-            shaderProgram.use();
+            TexturedObjShader texturedModelShader =
+                    (TexturedObjShader) shaderManager.loadShader(//todo map these together
+                            Constants.TEXTURE_MODEL_SHADER_NAME, new TexturedObjShader()
+                    );
+            DefaultObjShader defaultObjShader =
+                    (DefaultObjShader) shaderManager.loadShader(
+                            Constants.DEFAULT_MODEL_SHADER_NAME, new DefaultObjShader()
+                    );
 
-            viewMat = shaderProgram.viewMat;
-            projectionMat = shaderProgram.projMat;
-            modelMat = shaderProgram.modelMat;
-            cameraPosVec = shaderProgram.camPos;
+            if(texturedModelShader == null || defaultObjShader == null)throw new NullPointerException("SOMETHING WENT WRONG LOADING SHADER");
+            //todo save unis somewhere else so view etc can be applied on shaders of all unis
+            shaderManager.useShaderProgram(defaultObjShader);
         }
 
         //setUp cam
         {
             cam = new Camera();
 
-            viewMat.set(cam.getViewMatrix());
-            projectionMat.set(cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
-            cameraPosVec.set(cam.getPos());
+            shaderManager.setUni(Constants.VIEW_MAT_UNI, cam.getViewMatrix());
+            shaderManager.setUni(Constants.CAMERA_POS_UNI, cam.getPos());
+            shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
         }
 
         testTexture = new Texture(config.assetDirectory().toPath().resolve("textures/monkey.png"));
@@ -173,11 +170,10 @@ public class AbsoluteCinema {
         {
             objModels = new LinkedList<>();
             String[] meshPaths = {"mountains","man","cube","cube"/*,"axis","ship","teapotN"*/};
-            ModelShader shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.TESTING_SHADER_NAME);
             for(String filename : meshPaths){
 
                 Path objPath = config.assetDirectory().toPath().resolve("models").resolve(filename+".obj");
-                Model add = Model.fromFile(objPath, shaderProgram);
+                Model add = Model.fromFile(objPath);
 
                 if(filename.equals("man")){
                     add.setParent(objModels.get(0));
@@ -254,18 +250,23 @@ public class AbsoluteCinema {
             running = false;
         }
 
-        viewMat.set(cam.getViewMatrix());
-        cameraPosVec.set(cam.getPos());
-
         manYaw += (float) (0.3f*pDeltaTime);
         manPos.add(0, 0, (float) (1f*pDeltaTime));
         objModels.get(1).setPos(manPos);
         objModels.get(0).setRotation(0, manYaw, 0);
 
+
         for (Model m : objModels) {
-            m.draw();
+            shaderManager.useShaderProgram(m.getShaderProgram());
+
+            shaderManager.setUni(Constants.VIEW_MAT_UNI, cam.getViewMatrix());
+            shaderManager.setUni(Constants.CAMERA_POS_UNI, cam.getPos());
+            shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
+
+            m.draw(false);
         }
 
         window.swapBuffers();
+        shaderManager.noProgram();
     }
 }

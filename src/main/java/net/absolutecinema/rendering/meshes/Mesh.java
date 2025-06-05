@@ -5,6 +5,8 @@ import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.shader.FieldType;
 import net.absolutecinema.rendering.shader.LayoutEntry;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
+import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
+import org.lwjgl.opengl.GL33;
 
 import java.nio.FloatBuffer;
 import java.text.CollationElementIterator;
@@ -12,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
+import static net.absolutecinema.AbsoluteCinema.shaderManager;
 
 public class Mesh {
     private final ShaderProgram shader;
@@ -83,8 +86,14 @@ public class Mesh {
     }
 
     public void draw(){
-        getShaderProgram().use();//todo fix + batch up
+        draw(true);
+    }
+    public void draw(boolean applyShader){//todo fix + batch up
+        if(applyShader)
+            shaderManager.useShaderProgram(getShaderProgram());
+
         bindVAO();
+
         GraphicsWrapper.drawTriangles(vertCount);
     }
 

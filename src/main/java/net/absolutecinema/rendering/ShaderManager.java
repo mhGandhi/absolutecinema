@@ -1,8 +1,11 @@
 package net.absolutecinema.rendering;
 
 import net.absolutecinema.rendering.shader.Shader;
+import net.absolutecinema.rendering.shader.Uni;
+import net.absolutecinema.rendering.shader.UniformException;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 import net.absolutecinema.rendering.shader.ShaderType;
+import org.joml.Matrix4f;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,8 +19,11 @@ import static net.absolutecinema.Constants.SHADER_FOLDER_NAME;
 public class ShaderManager {
     private final Map<String, ShaderProgram> shaders;
 
+    private ShaderProgram selectedShader;
+
     public ShaderManager(){
         shaders = new HashMap<>();
+        selectedShader = null;
     }
 
     public ShaderProgram loadShader(String pSourceName, ShaderProgram pToLoad){
@@ -55,7 +61,6 @@ public class ShaderManager {
                     .toList();
         }
 
-        //ShaderProgram ret = new Simple3DShader();
         for (Path sh : indShaders){
             pTarget.attach(
                     new Shader(
@@ -72,5 +77,43 @@ public class ShaderManager {
 
     public ShaderProgram getShaderProgram(String pKey){
         return this.shaders.get(pKey);
+    }
+
+    public ShaderProgram useShaderProgram(String pKey) {
+        ShaderProgram ret = getShaderProgram(pKey);
+        useShaderProgram(ret);
+        return ret;
+    }
+
+    public void useShaderProgram(ShaderProgram pProg) {
+        if(pProg==selectedShader)return;
+
+        GraphicsWrapper.useProgram(pProg.id);
+
+        if(GraphicsWrapper.getCurrentShader() == pProg.id)
+            selectedShader = pProg;
+    }
+
+    public ShaderProgram getSelectedShader(){
+        return selectedShader;
+    }
+
+    public void noProgram(){
+        selectedShader = null;
+        GraphicsWrapper.noProgram();
+    }
+
+    public void setUni(String uniKey, Object pValue) {//todo track selected shader and only update that one
+        if(selectedShader == null) {
+            LOGGER.err("trying to assign value to uni while no shader is selected - returning");
+            return;
+        }
+        Uni<?> uni = selectedShader.getUni(uniKey);
+        if(uni == null){
+            LOGGER.err("selected shader "+selectedShader.toString()+" has no uni with key "+uniKey);
+            return;
+        }
+
+        uni.set(pValue);
     }
 }

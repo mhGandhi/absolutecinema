@@ -17,6 +17,7 @@ import java.nio.FloatBuffer;
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -72,18 +73,39 @@ public class GraphicsWrapper {
             throw new ProgramLinkingException("Shader program failed to link.");
         }
     }
+
+    private static int currentShader = 0;
     public static void useProgram(int pProgramId){
+        if(pProgramId == currentShader)return;
+
+        while (GL33.glGetError() != GL33.GL_NO_ERROR);
+
         GL33.glUseProgram(pProgramId);
+        currentShader = pProgramId;
+
+        int error = GL33.glGetError();
+        if (error != GL33.GL_NO_ERROR) {
+            LOGGER.err("OpenGL error: " + error + " while trying to apply shader with id "+ pProgramId);
+        }
+    }
+    public static void noProgram(){
+        GL33.glUseProgram(0);
     }
     public static void deleteProgram(int pProgramId){
         GL33.glDeleteProgram(pProgramId);
+        if(currentShader == pProgramId)currentShader = 0;
+    }
+    public static int getCurrentShader(){
+        return currentShader;
     }
 
     public static int getUniformLocation(int pProgramId, CharSequence pName){
         return GL33.glGetUniformLocation(pProgramId, pName);
     }
     //doesn't assure type safety
-    public static void putUniformValue(int pLocation, Object pValue){
+    public static void putUniformValue(int pProgramId, int pLocation, Object pValue) throws RenderException {
+        if(pProgramId!=currentShader)throw new RenderException("Trying to assign Uniform for non-selected Shader");
+
         if(pValue instanceof Matrix4f m4f){
             GL33.glUniformMatrix4fv(pLocation, false, m4f.get(new float[16]));
             return;
@@ -97,7 +119,7 @@ public class GraphicsWrapper {
             return;
         }
         if(pValue instanceof Texture tex){
-            glUniform1i(pLocation, tex.id);
+            glUniform1i(pLocation, GL_TEXTURE0);//todo some tex unit stuff
             return;
         }
     }
