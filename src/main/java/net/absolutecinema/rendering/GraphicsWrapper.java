@@ -74,14 +74,14 @@ public class GraphicsWrapper {
         }
     }
 
-    private static int currentShader = 0;
+    private static int currentShaderId = 0;
     public static void useProgram(int pProgramId){
-        if(pProgramId == currentShader)return;
+        if(pProgramId == currentShaderId)return;
 
         while (GL33.glGetError() != GL33.GL_NO_ERROR);
 
         GL33.glUseProgram(pProgramId);
-        currentShader = pProgramId;
+        currentShaderId = pProgramId;
 
         int error = GL33.glGetError();
         if (error != GL33.GL_NO_ERROR) {
@@ -93,10 +93,10 @@ public class GraphicsWrapper {
     }
     public static void deleteProgram(int pProgramId){
         GL33.glDeleteProgram(pProgramId);
-        if(currentShader == pProgramId)currentShader = 0;
+        if(currentShaderId == pProgramId) currentShaderId = 0;
     }
-    public static int getCurrentShader(){
-        return currentShader;
+    public static int getCurrentShaderId(){
+        return currentShaderId;
     }
 
     public static int getUniformLocation(int pProgramId, CharSequence pName){
@@ -104,7 +104,8 @@ public class GraphicsWrapper {
     }
     //doesn't assure type safety
     public static void putUniformValue(int pProgramId, int pLocation, Object pValue) throws RenderException {
-        if(pProgramId!=currentShader)throw new RenderException("Trying to assign Uniform for non-selected Shader");
+        if(pLocation == -1)throw new RenderException("Trying to assign Uniform with invalid location");
+        if(pProgramId!= currentShaderId)throw new RenderException("Trying to assign Uniform for non-selected Shader");
 
         if(pValue instanceof Matrix4f m4f){
             GL33.glUniformMatrix4fv(pLocation, false, m4f.get(new float[16]));

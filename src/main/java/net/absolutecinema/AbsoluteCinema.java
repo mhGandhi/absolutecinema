@@ -5,6 +5,7 @@ import net.absolutecinema.rendering.*;
 import net.absolutecinema.rendering.shader.Uni;
 import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
 import net.absolutecinema.rendering.shader.programs.ModelShader;
+import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -12,8 +13,7 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL33;
 
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -33,6 +33,7 @@ public class AbsoluteCinema {
 
     //////////////////////////////////////////////////
     List<Model> objModels;
+    Map<ShaderProgram, List<Model>> modelsByShader = new LinkedHashMap<>();
     public static Texture testTexture;
 
     Camera cam;
@@ -153,23 +154,24 @@ public class AbsoluteCinema {
 
             if(texturedModelShader == null || defaultObjShader == null)throw new NullPointerException("SOMETHING WENT WRONG LOADING SHADER");
             //todo save unis somewhere else so view etc can be applied on shaders of all unis
-            shaderManager.useShaderProgram(defaultObjShader);
+
+            //shaderManager.useShaderProgram(defaultObjShader);//temporarily hard lock defaultObjShader
         }
 
         //setUp cam
         {
             cam = new Camera();
 
-            shaderManager.setUni(Constants.VIEW_MAT_UNI, cam.getViewMatrix());
-            shaderManager.setUni(Constants.CAMERA_POS_UNI, cam.getPos());
-            shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
+            //shaderManager.setUni(Constants.VIEW_MAT_UNI, cam.getViewMatrix());
+            //shaderManager.setUni(Constants.CAMERA_POS_UNI, cam.getPos());
+            //shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
         }
 
         testTexture = new Texture(config.assetDirectory().toPath().resolve("textures/monkey.png"));
         //setUp objects
         {
             objModels = new LinkedList<>();
-            String[] meshPaths = {"mountains","man","cube","cube"/*,"axis","ship","teapotN"*/};
+            String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
             for(String filename : meshPaths){
 
                 Path objPath = config.assetDirectory().toPath().resolve("models").resolve(filename+".obj");
@@ -181,7 +183,15 @@ public class AbsoluteCinema {
                 objModels.add(add);
             }
             //objModels.get(0).setPos(new Vector3f(-10,-10,-10));
+
+            for (Model model : objModels) {
+                modelsByShader
+                        .computeIfAbsent(model.getShaderProgram(), k -> new ArrayList<>())
+                        .add(model);
+            }
         }
+
+        //GL33.glPolygonMode(GL33.GL_FRONT_AND_BACK, GL33.GL_LINE);
     }
 
     private void loop() {
@@ -196,6 +206,9 @@ public class AbsoluteCinema {
             lastTime = frameStartTime;
 
             frame(deltaTime);
+            if(window.shouldClose()){
+                running = false;
+            }
 
             frames++;
             if (frameStartTime - timer >= 1.0) {
@@ -243,28 +256,58 @@ public class AbsoluteCinema {
     }
 
     private void frame(double pDeltaTime){
+        LOGGER.debugPF("========== FRAME START");
         GraphicsWrapper.clearWin();
         frameCount++;
         GraphicsWrapper.pollEvents();
-        if(window.shouldClose()){
-            running = false;
-        }
 
-        manYaw += (float) (0.3f*pDeltaTime);
-        manPos.add(0, 0, (float) (1f*pDeltaTime));
+        manYaw += (float) (0.03f*pDeltaTime);
+        manPos.add(0, 0, (float) (0.1f*pDeltaTime));
         objModels.get(1).setPos(manPos);
         objModels.get(0).setRotation(0, manYaw, 0);
 
 
-        for (Model m : objModels) {
-            shaderManager.useShaderProgram(m.getShaderProgram());
+        for (Map.Entry<ShaderProgram, List<Model>> entry : modelsByShader.entrySet()){
+            ShaderProgram sp = entry.getKey();
+            shaderManager.useShaderProgram(sp);
 
             shaderManager.setUni(Constants.VIEW_MAT_UNI, cam.getViewMatrix());
             shaderManager.setUni(Constants.CAMERA_POS_UNI, cam.getPos());
             shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
 
-            m.draw(false);
+            for(Model m : entry.getValue()){
+                if (sp instanceof TexturedObjShader texturedShader) texturedShader.setTexture(0);
+
+                shaderManager.setUni(Constants.MODEL_MAT_UNI, m.calcRelModelMat());
+                m.getMesh().draw(false);
+            }
         }
+
+        /*
+        for (Model m : objModels) {
+            //LOGGER.debugPF("DRAWING "+m);
+            ShaderProgram sp = m.getShaderProgram();
+            if(sp == null){
+                LOGGER.err("No shader for model "+m+", skipping render.");
+                continue;
+            }
+            if (sp instanceof TexturedObjShader texturedShader) {
+                texturedShader.setTexture(0);
+            }
+
+            shaderManager.useShaderProgram(sp);//BIND SHADER
+
+            shaderManager.setUni(Constants.VIEW_MAT_UNI, cam.getViewMatrix());
+            shaderManager.setUni(Constants.CAMERA_POS_UNI, cam.getPos());
+            shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
+
+            shaderManager.setUni(Constants.MODEL_MAT_UNI, m.calcRelModelMat());
+
+
+            LOGGER.debugPF("Drawing model: " + m + ", Shader: " + sp + ", VAO: " + m.getMesh().getVAO().id);
+
+            m.getMesh().draw(false);
+        }*/
 
         window.swapBuffers();
         shaderManager.noProgram();

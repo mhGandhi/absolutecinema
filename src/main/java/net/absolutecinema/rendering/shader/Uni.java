@@ -13,7 +13,7 @@ public class Uni<T> extends GLObject {
     public final UniformType type;
     public final ShaderProgram program;
 
-    public Uni(ShaderProgram pProgram, CharSequence pName, T startVal){
+    public Uni(ShaderProgram pProgram, CharSequence pName, T startVal) throws UniformException{
         super(GraphicsWrapper.getUniformLocation(pProgram.id, pName));
         program = pProgram;
         if(startVal == null){
@@ -27,12 +27,14 @@ public class Uni<T> extends GLObject {
         set(startVal);
     }
 
-    public void set(Object pVal){
+    public boolean set(Object pVal){
         try {
             GraphicsWrapper.putUniformValue(this.program.id, this.id, pVal);
         } catch (RenderException e) {
             e.printStackTrace(LOGGER.getErrorStream());
+            return false;
         }
+        return true;
     }
 
     public static String uniMapToString(Map<String, Uni<?>> pMap){

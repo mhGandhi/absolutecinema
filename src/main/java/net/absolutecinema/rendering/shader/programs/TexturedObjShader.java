@@ -11,12 +11,14 @@ import static org.lwjgl.opengl.GL20.glUniform1i;
 
 public class TexturedObjShader extends DefaultObjShader{
     @Override
-    protected void assignUnis() {
-        super.assignUnis();
+    protected boolean assignUnis() {
+        boolean superSuccessful = super.assignUnis();
 
         texture = (Uni<Texture>) addUni(Constants.TEXTURE_UNI, Texture.empty());
 
         addLayoutEntry(new LayoutEntry(Constants.UV_COORDINATE_LAYOUT_FIELD, 2, FieldType.FLOAT, false));
+
+        return texture!=null && superSuccessful;
     }
 
     Uni<Texture> texture;

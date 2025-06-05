@@ -33,12 +33,19 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
         stride = -1;
     }
 
-    public Uni<?> addUni(CharSequence pKey, Object initVal){
+    public Uni<?> addUni(CharSequence pKey, Object initVal) {
         if(isLinked()){
-            throw new UniformException("ShaderProgram already linked; can not modify uniforms");
+            throw new ProgramLinkingException("ShaderProgram already linked; can not modify uniforms");
         }
 
-        Uni<?> uniform = new Uni<>(this, pKey, initVal);
+        Uni<?> uniform = null;
+        try {
+            uniform = new Uni<>(this, pKey, initVal);
+        } catch (UniformException e) {
+            LOGGER.err(e.getMessage());
+            return null;
+        }
+
         uniforms.put((String)pKey, uniform);
         return uniform;
     }
@@ -110,27 +117,34 @@ public class ShaderProgram extends GLObject implements AutoCloseable {
             return;
         }
 
-        assignUnis();
-        linked = true;
-
-        for (Shader s: shaders) {
-            s.close();
-        }
-        shaders.clear();
-
-        {//determine stride
-            int fieldsSize = 0;
-            for(LayoutEntry le : getLayout()){
-                fieldsSize += le.size();
+        boolean unisAssigned = assignUnis();
+        if(unisAssigned){
+            linked = true;
+            for (Shader s: shaders) {
+                s.close();
             }
-            this.stride = fieldsSize;
-        }
+            shaders.clear();
 
-        LOGGER.info("LINKED " + this.toString());
+            {//determine stride
+                int fieldsSize = 0;
+                for(LayoutEntry le : getLayout()){
+                    fieldsSize += le.size();
+                }
+                this.stride = fieldsSize;
+            }
+
+            LOGGER.info("LINKED " + this.toString());
+        }else{
+            LOGGER.err("ERROR ASSIGNING UNIS TO SHADER "+this+" PLEASE RESTART");
+            //todo unlink again
+        }
+        shaderManager.noProgram();
     }
 
-    protected void assignUnis() {
+    protected boolean assignUnis() {
         shaderManager.useShaderProgram(this);
+
+        return true;
         //override here
     }
 

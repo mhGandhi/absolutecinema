@@ -86,11 +86,12 @@ public class ShaderManager {
     }
 
     public void useShaderProgram(ShaderProgram pProg) {
-        if(pProg==selectedShader)return;
+        if(pProg==selectedShader) return;
 
+        LOGGER.debugPF("USING SHADER "+pProg);
         GraphicsWrapper.useProgram(pProg.id);
 
-        if(GraphicsWrapper.getCurrentShader() == pProg.id)
+        if(GraphicsWrapper.getCurrentShaderId() == pProg.id)
             selectedShader = pProg;
     }
 
@@ -103,14 +104,14 @@ public class ShaderManager {
         GraphicsWrapper.noProgram();
     }
 
-    public void setUni(String uniKey, Object pValue) {//todo track selected shader and only update that one
+    public void setUni(String uniKey, Object pValue) {
         if(selectedShader == null) {
             LOGGER.err("trying to assign value to uni while no shader is selected - returning");
             return;
         }
         Uni<?> uni = selectedShader.getUni(uniKey);
         if(uni == null){
-            LOGGER.err("selected shader "+selectedShader.toString()+" has no uni with key "+uniKey);
+            LOGGER.err("selected shader "+selectedShader+" has no uni with key "+uniKey);
             return;
         }
 

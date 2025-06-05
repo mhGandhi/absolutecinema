@@ -27,14 +27,13 @@ public class Model {
 
     private Model parent;
 
-    private final Uni<Matrix4f> modelMatUni;
-
     private Model(Mesh pMesh, ModelShader pShader){//todo change that shit
         this.mesh = pMesh;
         this.shaderProgram = pShader;
         this.parent = null;
 
-        this.modelMatUni = pShader.modelMat;
+        if (pShader.modelMat == null)
+            throw new IllegalStateException("Shader program missing modelMat uniform: " + pShader);
 
         relModelMat = new Matrix4f().identity();
     }
@@ -51,11 +50,10 @@ public class Model {
         relModelMat.scale(scale);
     }
 
-    public Matrix4f getRelModelMat(){
-        if(getParent() == null)
-        return relModelMat;
+    public Matrix4f calcRelModelMat(){
+        if(getParent() == null) return relModelMat;
         else {
-            return new Matrix4f(getParent().getRelModelMat()).mul(relModelMat);
+            return new Matrix4f(getParent().calcRelModelMat()).mul(relModelMat);
             //return getParent().getRelModelMat().mul(relModelMat);
             //return relModelMat.mul(getParent().getRelModelMat());
         }
@@ -75,16 +73,6 @@ public class Model {
 
     public void setParent(Model pPar){
         this.parent = pPar;
-    }
-
-    public void draw(){
-        draw(true);
-    }
-
-    public void draw(boolean applyShader){
-        if(applyShader) shaderManager.useShaderProgram(getShaderProgram());
-        modelMatUni.set(getRelModelMat());
-        getMesh().draw(false);
     }
 
     public static Model fromFile(Path pPath){
@@ -112,34 +100,35 @@ public class Model {
         //System.out.println("norm "+hasNormals);
         //System.out.println("tex "+hasTexCoords);
 
-        ModelShader shaderProgram;
+        ShaderProgram shaderProgram;
         if(pShader != null){
             shaderProgram = pShader;
         }else{
             if(mesh.mTextureCoords(0)==null){
                 System.out.println("NOTEX "+pPath.toString());
-                shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.DEFAULT_MODEL_SHADER_NAME);
+                shaderProgram = shaderManager.getShaderProgram(Constants.DEFAULT_MODEL_SHADER_NAME);
             }else{
                 System.out.println("TEXTURE "+pPath.toString());
-                shaderProgram = (ModelShader) shaderManager.getShaderProgram(Constants.TEXTURE_MODEL_SHADER_NAME);
+                shaderProgram = shaderManager.getShaderProgram(Constants.TEXTURE_MODEL_SHADER_NAME);
             }
             // Determine shader based on available data //todo
         }
+        ModelShader modelShaderProg = (ModelShader) shaderProgram;//todo except mby?
 
         // Load mesh
         //todo
         Mesh convertedMesh;
-        if(shaderProgram instanceof TexturedObjShader tos){
+        if(modelShaderProg instanceof TexturedObjShader tos){
             convertedMesh = new TexturedMesh(tos, AbsoluteCinema.testTexture);
         }else{
-            convertedMesh = new Mesh(shaderProgram);
+            convertedMesh = new Mesh(modelShaderProg);
         }
 
-        convertedMesh.assignVertices(meshToArr(mesh, shaderProgram));
+        convertedMesh.assignVertices(meshToArr(mesh, modelShaderProg));
 
         Assimp.aiReleaseImport(scene);
 
-        return new Model(convertedMesh, shaderProgram);
+        return new Model(convertedMesh, modelShaderProg);
     }
 
     private static float[] meshToArr(AIMesh pMesh, ShaderProgram pShader){//todo maybe offload somewhere else
@@ -154,10 +143,10 @@ public class Model {
         boolean noTexCoords = texCoords == null;
 
         if(noNormals){
-            LOGGER.debug("Expected normals but found none");
+            LOGGER.debug("No normals");
         }
         if(noTexCoords){
-            LOGGER.debug("Expected texture coordinates but found none");
+            LOGGER.debug("No Tex Coords");
         }
 
         for (int j = 0; j < faces.remaining(); j++) {

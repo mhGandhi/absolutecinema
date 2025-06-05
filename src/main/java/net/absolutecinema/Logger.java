@@ -51,7 +51,10 @@ public class Logger {//todo
                 .map(line -> pPrefix + line)
                 .reduce((a, b) -> a + "\n" + b)
                 .orElse("");
-        return ret+"\n";
+        return ret;
     }
 
+    public void debugPF(String s) {
+        //debug(s);
+    }
 }

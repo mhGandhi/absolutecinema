@@ -61,6 +61,7 @@ public class Camera {
     }
 
     public Matrix4f getProjectionMatrix(float fov, float aspectRatio, float near, float far) {
+        projectionMatrix.identity();
         projectionMatrix.perspective(fov, aspectRatio, near, far);
         return projectionMatrix;
     }
@@ -82,5 +83,19 @@ public class Camera {
         right.set(right.x * cosRoll - up.x * sinRoll, right.y * cosRoll - up.y * sinRoll, right.z * cosRoll - up.z * sinRoll);
 
         up.set(right).cross(forward).normalize();
+    }
+
+    public void setRotation(int i, int i1, int i2) {
+        pitch = i;
+        yaw = i1;
+        roll = i2;
+
+        updateVectors();
+    }
+
+    public void setPos(Vector3f vector3f) {
+        position.set(0);
+
+        updateVectors();
     }
 }

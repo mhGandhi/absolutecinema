@@ -11,8 +11,8 @@ public class DefaultObjShader extends ModelShader {
     //todo replace with class dynamically generating fields from file
 
     @Override
-    protected void assignUnis() {
-        super.assignUnis();
+    protected boolean assignUnis() {
+        boolean superSuccessful = super.assignUnis();
 
         viewMat = (Uni<Matrix4f>) addUni(Constants.VIEW_MAT_UNI, Constants.IDENTITY_4F);
         projMat = (Uni<Matrix4f>) addUni(Constants.PROJECTION_MAT_UNI, Constants.IDENTITY_4F);
@@ -20,6 +20,8 @@ public class DefaultObjShader extends ModelShader {
 
         addLayoutEntry(new LayoutEntry(Constants.VERT_COORDINATE_LAYOUT_FIELD , 3, FieldType.FLOAT, false));
         addLayoutEntry(new LayoutEntry(Constants.VERT_NORMAL_LAYOUT_FIELD      , 3, FieldType.FLOAT, true));
+
+        return viewMat!=null && projMat!=null && camPos!=null && superSuccessful;
     }
 
     public Uni<Matrix4f> viewMat;

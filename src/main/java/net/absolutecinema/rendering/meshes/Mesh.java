@@ -1,6 +1,8 @@
 package net.absolutecinema.rendering.meshes;
 
 import net.absolutecinema.Buffers;
+import net.absolutecinema.Constants;
+import net.absolutecinema.rendering.GLObject;
 import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.shader.FieldType;
 import net.absolutecinema.rendering.shader.LayoutEntry;
@@ -45,6 +47,19 @@ public class Mesh {
         for(LayoutEntry le : pShaderProgram.getLayout()){
             addField(le.size(), le.type(), le.normalize());
         }
+
+//        for (LayoutEntry le : shader.getLayout()) {
+//            int location = switch (le.name()) {
+//                case Constants.VERT_COORDINATE_LAYOUT_FIELD -> 0;
+//                case Constants.VERT_NORMAL_LAYOUT_FIELD -> 1;
+//                case Constants.UV_COORDINATE_LAYOUT_FIELD -> 2;
+//                default -> throw new IllegalStateException("Unknown layout field: " + le.name());
+//            };
+//
+//            GraphicsWrapper.assignVToV(location, le.size(), le.normalize(), stride, lastOffset, le.type());
+//            lastOffset += le.size();
+//            GraphicsWrapper.enableVToV(location);
+//        }
     }
 
     public ShaderProgram getShaderProgram(){
@@ -52,11 +67,11 @@ public class Mesh {
     }
 
     public void uploadToVBO(FloatBuffer pBuffer){
+        vao.bind();
         vbo.bind();
         GraphicsWrapper.uploadToVBO(pBuffer);
 
         vertCount = pBuffer.limit() / stride;
-        //MemoryUtil.memFree(pBuffer);
     }
 
     public void addField(int pSize, FieldType pType, boolean pNormalize){
@@ -71,9 +86,13 @@ public class Mesh {
         vao.bind();
         vbo.bind();
         lastIndex++;
+
+        //LOGGER.debug("Assigning attr index " + lastIndex + " at offset " + lastOffset + " of stride " + stride);
+
         GraphicsWrapper.assignVToV(lastIndex, pSize, pNormalize, this.stride, lastOffset, pType);
-        lastOffset+=pSize;
         GraphicsWrapper.enableVToV(lastIndex);
+        //LOGGER.debug("Enabled vertex attrib index " + lastIndex + " (offset=" + lastOffset + ")");
+        lastOffset+=pSize;
     }
 
     public void unbind(){
@@ -92,8 +111,8 @@ public class Mesh {
         if(applyShader)
             shaderManager.useShaderProgram(getShaderProgram());
 
-        bindVAO();
-
+        bindVAO();//BIND VAO
+        //vbo.bind();
         GraphicsWrapper.drawTriangles(vertCount);
     }
 
@@ -104,4 +123,7 @@ public class Mesh {
         Buffers.free(vertexBuffer);
     }
 
+    public Vao getVAO() {
+        return vao;
+    }
 }

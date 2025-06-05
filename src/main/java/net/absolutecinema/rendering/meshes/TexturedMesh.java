@@ -1,8 +1,10 @@
 package net.absolutecinema.rendering.meshes;
 
+import net.absolutecinema.rendering.GraphicsWrapper;
 import net.absolutecinema.rendering.Texture;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
+import org.lwjgl.opengl.GL33;
 import org.lwjgl.opengl.GLXEXTTextureFromPixmap;
 import org.w3c.dom.Text;
 
