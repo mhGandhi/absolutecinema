@@ -3,9 +3,11 @@ package net.absolutecinema.models;
 import net.absolutecinema.AbsoluteCinema;
 import net.absolutecinema.Constants;
 import net.absolutecinema.rendering.RenderException;
+import net.absolutecinema.rendering.meshes.ColoredMesh;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.meshes.TexturedMesh;
 import net.absolutecinema.rendering.shader.LayoutEntry;
+import net.absolutecinema.rendering.shader.Shader;
 import net.absolutecinema.rendering.shader.programs.ColoredObjShader;
 import net.absolutecinema.rendering.shader.programs.ModelShader;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import static net.absolutecinema.AbsoluteCinema.LOGGER;
@@ -26,13 +30,17 @@ import static net.absolutecinema.AbsoluteCinema.shaderManager;
 
 public class Model {
     private final Matrix4f relModelMat;
-    private final Mesh mesh;
+    private final Collection<Mesh> meshes;
     private final ModelShader shaderProgram;
 
     private Model parent;
 
-    private Model(Mesh pMesh, ModelShader pShader){//todo change that shit
-        this.mesh = pMesh;
+    private Model(Mesh pMesh, ModelShader pShader){
+        this(List.of(pMesh), pShader);
+    }
+
+    private Model(Collection<Mesh> pMeshes, ModelShader pShader){//todo change that shit
+        this.meshes = pMeshes;
         this.shaderProgram = pShader;
         this.parent = null;
 
@@ -63,8 +71,8 @@ public class Model {
         }
     }
 
-    public Mesh getMesh(){
-        return this.mesh;
+    public Collection<Mesh> getMeshes(){
+        return this.meshes;
     }
 
     public ShaderProgram getShaderProgram(){
@@ -109,19 +117,38 @@ public class Model {
             throw new RuntimeException("Error loading model: " + Assimp.aiGetErrorString());
         }
 
-        AIMesh mesh = AIMesh.create(scene.mMeshes().get(0)); // First mesh only for simplicity
-        AIMaterial material = AIMaterial.create(scene.mMaterials().get(mesh.mMaterialIndex()));
+        List<Mesh> allMeshes = new LinkedList<>();
+
+        for(int i = 0; i<scene.mNumMeshes(); i++){
+            AIMesh mesh = AIMesh.create(scene.mMeshes().get(i));
+            AIMaterial material = AIMaterial.create(scene.mMaterials().get(mesh.mMaterialIndex()));
+
+            Mesh convertedMesh = convertMesh(mesh, material, pShader, pPath);
+            if(convertedMesh==null)continue;
+
+            ModelShader modelShaderProg = (ModelShader) convertedMesh.getShaderProgram();
+            convertedMesh.assignVertices(meshToArr(mesh, modelShaderProg));
+
+            allMeshes.add(convertedMesh);
+        }
+
+
+        Assimp.aiReleaseImport(scene);
+        return new Model(allMeshes,(ModelShader) allMeshes.get(0).getShaderProgram());
+    }
+
+    private static Mesh convertMesh(AIMesh pAIMesh, AIMaterial pMaterial, ShaderProgram pShader, Path pPath) throws Exception {
         AIColor4D color = AIColor4D.create();
 
         AIString matName = AIString.calloc();
-        Assimp.aiGetMaterialString(material, Assimp.AI_MATKEY_NAME, 0, 0, matName);
+        Assimp.aiGetMaterialString(pMaterial, Assimp.AI_MATKEY_NAME, 0, 0, matName);
 
-        boolean hasNormals = mesh.mNormals() != null;
-        boolean hasTexCoords = mesh.mTextureCoords(0) != null;
-        boolean hasDiffuseColor = Assimp.aiGetMaterialColor(material, Assimp.AI_MATKEY_COLOR_DIFFUSE, 0, 0, color) == 0;
+        boolean hasNormals = pAIMesh.mNormals() != null;
+        boolean hasTexCoords = pAIMesh.mTextureCoords(0) != null;
+        boolean hasDiffuseColor = Assimp.aiGetMaterialColor(pMaterial, Assimp.AI_MATKEY_COLOR_DIFFUSE, 0, 0, color) == 0;
         boolean isDefaultDiffuse = color.r() == 0.6f && color.g() == 0.6f && color.b() == 0.6f;
         boolean hasSpecificMaterialProbably = hasDiffuseColor && !isDefaultDiffuse;
-        boolean hasColor = hasSpecificMaterialProbably && (Assimp.aiGetMaterialColor(material, Assimp.AI_MATKEY_COLOR_DIFFUSE, 0, 0, color)==0);
+        boolean hasColor = hasSpecificMaterialProbably && (Assimp.aiGetMaterialColor(pMaterial, Assimp.AI_MATKEY_COLOR_DIFFUSE, 0, 0, color)==0);
 
         LOGGER.debug("MODEL "+pPath+(hasNormals?" -normals ":"")+(hasTexCoords?" -txCoords ":"")+(hasSpecificMaterialProbably?" -material ":"")+(hasColor?(" -col:["+color.r()+"|"+color.g()+"|"+color.b()+"]"):""));
 
@@ -167,15 +194,13 @@ public class Model {
         Mesh convertedMesh;
         if(modelShaderProg instanceof TexturedObjShader tos){
             convertedMesh = new TexturedMesh(tos, AbsoluteCinema.testTexture);
-        }else{
+        }else if(modelShaderProg instanceof ColoredObjShader cos){
+            convertedMesh = new ColoredMesh(cos, new Vector3f(color.r(),color.g(),color.b()));
+        } else{
             convertedMesh = new Mesh(modelShaderProg);
         }
 
-        convertedMesh.assignVertices(meshToArr(mesh, modelShaderProg));
-
-        Assimp.aiReleaseImport(scene);
-
-        return new Model(convertedMesh, modelShaderProg);
+        return convertedMesh;
     }
 
     private static float[] meshToArr(AIMesh pMesh, ShaderProgram pShader){//todo maybe offload somewhere else

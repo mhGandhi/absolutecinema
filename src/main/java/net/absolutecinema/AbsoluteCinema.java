@@ -3,6 +3,8 @@ package net.absolutecinema;
 import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.*;
 import net.absolutecinema.rendering.meshes.ColoredMesh;
+import net.absolutecinema.rendering.meshes.Mesh;
+import net.absolutecinema.rendering.meshes.TexturedMesh;
 import net.absolutecinema.rendering.shader.Uni;
 import net.absolutecinema.rendering.shader.programs.*;
 import org.joml.Matrix4f;
@@ -286,11 +288,15 @@ public class AbsoluteCinema {
             shaderManager.setUni(Constants.PROJECTION_MAT_UNI, cam.getProjectionMatrix((float) Math.toRadians(options.getFov()), ((float) 800 / (float) 600), 0.0001f, 1000.0f));
 
             for(Model m : entry.getValue()){
-                if (sp instanceof TexturedObjShader texturedShader) texturedShader.setTexture(0);
-                if (sp instanceof ColoredObjShader coloredObjShader) coloredObjShader.color.set(new Vector3f(1f,1f,1f));
+
 
                 shaderManager.setUni(Constants.MODEL_MAT_UNI, m.calcRelModelMat());
-                m.getMesh().draw();
+                for (Mesh mesh : m.getMeshes()) {//todo shader sorting broken now
+                    if (sp instanceof TexturedObjShader texturedShader && mesh instanceof TexturedMesh texMesh) texturedShader.setTexture(0);//todo
+                    if (sp instanceof ColoredObjShader coloredObjShader && mesh instanceof ColoredMesh colMesh) coloredObjShader.color.set(colMesh.getColor());
+                    mesh.draw();
+                }
+
             }
         }
 
