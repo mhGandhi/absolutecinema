@@ -104,13 +104,8 @@ public class Mesh {
         this.vao.bind();
     }
 
-    public void draw(){
-        draw(true);
-    }
-    public void draw(boolean applyShader){//todo fix + batch up
-        if(applyShader)
-            shaderManager.useShaderProgram(getShaderProgram());
 
+    public void draw(){
         bindVAO();//BIND VAO
         //vbo.bind();
         GraphicsWrapper.drawTriangles(vertCount);

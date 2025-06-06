@@ -75,11 +75,13 @@ public class ShaderManager {
         return pTarget;
     }
 
-    public ShaderProgram getShaderProgram(String pKey){
-        return this.shaders.get(pKey);
+    public ShaderProgram getShaderProgram(String pKey) throws RenderException {
+        ShaderProgram ret = this.shaders.get(pKey);
+        if(ret==null)throw new RenderException("SHADER "+pKey+" NOT FOUND IN MANAGER");
+        return ret;
     }
 
-    public ShaderProgram useShaderProgram(String pKey) {
+    public ShaderProgram useShaderProgram(String pKey) throws RenderException {
         ShaderProgram ret = getShaderProgram(pKey);
         useShaderProgram(ret);
         return ret;

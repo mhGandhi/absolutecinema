@@ -2,9 +2,11 @@ package net.absolutecinema.models;
 
 import net.absolutecinema.AbsoluteCinema;
 import net.absolutecinema.Constants;
+import net.absolutecinema.rendering.RenderException;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.meshes.TexturedMesh;
 import net.absolutecinema.rendering.shader.LayoutEntry;
+import net.absolutecinema.rendering.shader.programs.ColoredObjShader;
 import net.absolutecinema.rendering.shader.programs.ModelShader;
 import net.absolutecinema.rendering.shader.programs.ShaderProgram;
 import net.absolutecinema.rendering.shader.Uni;
@@ -13,6 +15,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.assimp.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,11 +79,24 @@ public class Model {
         this.parent = pPar;
     }
 
-    public static Model fromFile(Path pPath){
+    public static Model fromFile(Path pPath) throws Exception {
         return fromFile(pPath, null);
     }
 
-    public static Model fromFile(Path pPath, ModelShader pShader) {
+    public static Model fromFile(Path pPath, ModelShader pShader) throws Exception {
+        // If pPath is a directory, find the first .obj file inside
+        if (Files.isDirectory(pPath)) {
+            try {
+                Path finalPPath = pPath;
+                pPath = Files.walk(pPath, 1)
+                        .filter(p -> p.toString().toLowerCase().endsWith(".obj"))
+                        .findFirst()
+                        .orElseThrow(() -> new IOException("No .obj file found in folder: " + finalPPath));
+            } catch (IOException e) {
+                throw new RuntimeException("Error scanning directory for .obj file: " + e.getMessage(), e);
+            }
+        }
+
         String modelPath = pPath.toAbsolutePath().toString();
 
         AIScene scene = Assimp.aiImportFile(modelPath,
@@ -93,24 +110,54 @@ public class Model {
         }
 
         AIMesh mesh = AIMesh.create(scene.mMeshes().get(0)); // First mesh only for simplicity
+        AIMaterial material = AIMaterial.create(scene.mMaterials().get(mesh.mMaterialIndex()));
+        AIColor4D color = AIColor4D.create();
+
+        AIString matName = AIString.calloc();
+        Assimp.aiGetMaterialString(material, Assimp.AI_MATKEY_NAME, 0, 0, matName);
 
         boolean hasNormals = mesh.mNormals() != null;
         boolean hasTexCoords = mesh.mTextureCoords(0) != null;
+        boolean hasDiffuseColor = Assimp.aiGetMaterialColor(material, Assimp.AI_MATKEY_COLOR_DIFFUSE, 0, 0, color) == 0;
+        boolean isDefaultDiffuse = color.r() == 0.6f && color.g() == 0.6f && color.b() == 0.6f;
+        boolean hasSpecificMaterialProbably = hasDiffuseColor && !isDefaultDiffuse;
+        boolean hasColor = hasSpecificMaterialProbably && (Assimp.aiGetMaterialColor(material, Assimp.AI_MATKEY_COLOR_DIFFUSE, 0, 0, color)==0);
+
+        LOGGER.debug("MODEL "+pPath+(hasNormals?" -normals ":"")+(hasTexCoords?" -txCoords ":"")+(hasSpecificMaterialProbably?" -material ":"")+(hasColor?(" -col:["+color.r()+"|"+color.g()+"|"+color.b()+"]"):""));
 
         //System.out.println("norm "+hasNormals);
         //System.out.println("tex "+hasTexCoords);
 
-        ShaderProgram shaderProgram;
+        ShaderProgram shaderProgram = null;
         if(pShader != null){
             shaderProgram = pShader;
         }else{
-            if(mesh.mTextureCoords(0)==null){
-                System.out.println("NOTEX "+pPath.toString());
-                shaderProgram = shaderManager.getShaderProgram(Constants.DEFAULT_MODEL_SHADER_NAME);
-            }else{
-                System.out.println("TEXTURE "+pPath.toString());
-                shaderProgram = shaderManager.getShaderProgram(Constants.TEXTURE_MODEL_SHADER_NAME);
+            if(hasTexCoords /*todo && hasTexture*/){
+                try {
+                    shaderProgram = shaderManager.getShaderProgram(Constants.TEXTURE_MODEL_SHADER_NAME);
+                    LOGGER.debug("TEXTURE "+pPath.toString());
+                } catch (RenderException e) {
+                    LOGGER.fatal(e.getMessage());
+                }
             }
+            if(shaderProgram==null && hasColor){
+                try {
+                    shaderProgram = shaderManager.getShaderProgram(Constants.COLORED_MODEL_SHADER_NAME);
+                    LOGGER.debug("COLOR "+pPath.toString());
+                } catch (RenderException e) {
+                    LOGGER.fatal(e.getMessage());
+                }
+            }
+            if(shaderProgram==null){
+                try {
+                    shaderProgram = shaderManager.getShaderProgram(Constants.DEFAULT_MODEL_SHADER_NAME);
+                    LOGGER.debug("DEFAULT "+pPath.toString());
+                } catch (RenderException e) {
+                    LOGGER.fatal(e.getMessage());
+                }
+            }
+
+            if(shaderProgram==null)throw new Exception("NO FITTING SHADER FOUND FOR MODEL AT "+pPath.toString());
             // Determine shader based on available data //todo
         }
         ModelShader modelShaderProg = (ModelShader) shaderProgram;//todo except mby?

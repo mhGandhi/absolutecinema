@@ -8,6 +8,7 @@ public class Constants {
 
     public static final String DEFAULT_MODEL_SHADER_NAME = "default";
     public static final String TEXTURE_MODEL_SHADER_NAME = "texture";
+    public static final String COLORED_MODEL_SHADER_NAME = "colored";
 
     public static final String VIEW_MAT_UNI = "uViewMat";
     public static final String MODEL_MAT_UNI = "uModelMat";
@@ -18,6 +19,7 @@ public class Constants {
     public static final String VERT_COORDINATE_LAYOUT_FIELD = "vertexCoordinate";
     public static final String VERT_NORMAL_LAYOUT_FIELD = "vertexNormal";
     public static final String UV_COORDINATE_LAYOUT_FIELD = "uvCoordinate";
+    public static final String BASE_COLOR_UNI = "uBaseColor";
 
     public static final Matrix4f IDENTITY_4F = new Matrix4f().identity();
     public static final Vector3f ZERO_VEC3F = new Vector3f().zero();

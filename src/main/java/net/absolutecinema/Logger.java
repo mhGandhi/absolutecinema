@@ -27,23 +27,23 @@ public class Logger {//todo
     }
 
     public void debug(String pDebug){
-        System.out.println(withPrefixOnEachLine("[DBG] ", pDebug));
+        System.out.println(withPrefixOnEachLine("[DBG]\t", pDebug));
     }
 
     public void info(String pInfo){
-        System.out.println(withPrefixOnEachLine("[INF] ", pInfo));
+        System.out.println(withPrefixOnEachLine("[INF]\t", pInfo));
     }
 
     public void warn(String pWarn){
-        System.out.println(withPrefixOnEachLine("[WRN] ", pWarn));
+        System.out.println(withPrefixOnEachLine("[WRN]\t", pWarn));
     }
 
     public void err(String pErr){
-        System.err.println(withPrefixOnEachLine("[ERR] ", pErr));
+        System.err.println(withPrefixOnEachLine("[ERR]\t", pErr));
     }
 
     public void fatal(String pFatal){
-        System.err.println(withPrefixOnEachLine("[FAT] ", pFatal));
+        System.err.println(withPrefixOnEachLine("[FAT]\t", pFatal));
     }
 
     public String withPrefixOnEachLine(String pPrefix, String pContent) {

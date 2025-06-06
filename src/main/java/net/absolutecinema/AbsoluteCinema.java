@@ -2,11 +2,9 @@ package net.absolutecinema;
 
 import net.absolutecinema.models.Model;
 import net.absolutecinema.rendering.*;
+import net.absolutecinema.rendering.meshes.ColoredMesh;
 import net.absolutecinema.rendering.shader.Uni;
-import net.absolutecinema.rendering.shader.programs.DefaultObjShader;
-import net.absolutecinema.rendering.shader.programs.ModelShader;
-import net.absolutecinema.rendering.shader.programs.ShaderProgram;
-import net.absolutecinema.rendering.shader.programs.TexturedObjShader;
+import net.absolutecinema.rendering.shader.programs.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -151,8 +149,12 @@ public class AbsoluteCinema {
                     (DefaultObjShader) shaderManager.loadShader(
                             Constants.DEFAULT_MODEL_SHADER_NAME, new DefaultObjShader()
                     );
+            ColoredObjShader coloredObjShader =
+                    (ColoredObjShader) shaderManager.loadShader(
+                            Constants.COLORED_MODEL_SHADER_NAME, new ColoredObjShader()
+                    );
 
-            if(texturedModelShader == null || defaultObjShader == null)throw new NullPointerException("SOMETHING WENT WRONG LOADING SHADER");
+            if(texturedModelShader==null || defaultObjShader==null || coloredObjShader==null)throw new NullPointerException("SOMETHING WENT WRONG LOADING SHADER");
             //todo save unis somewhere else so view etc can be applied on shaders of all unis
 
             //shaderManager.useShaderProgram(defaultObjShader);//temporarily hard lock defaultObjShader
@@ -171,11 +173,19 @@ public class AbsoluteCinema {
         //setUp objects
         {
             objModels = new LinkedList<>();
-            String[] meshPaths = {"mountains","man","cube","axis","ship","teapotN"};
+            String[] meshPaths = {"mountains.obj","cube.obj","man.obj","IronMan","livingRoom"};
             for(String filename : meshPaths){
 
-                Path objPath = config.assetDirectory().toPath().resolve("models").resolve(filename+".obj");
-                Model add = Model.fromFile(objPath);
+                System.out.println(" ====== "+filename);
+
+                Path objPath = config.assetDirectory().toPath().resolve("models").resolve(filename);
+                Model add = null;
+                try {
+                    add = Model.fromFile(objPath);
+                } catch (Exception e) {
+                    LOGGER.err(e.getMessage());
+                    continue;
+                }
 
                 if(filename.equals("man")){
                     add.setParent(objModels.get(0));
@@ -277,9 +287,10 @@ public class AbsoluteCinema {
 
             for(Model m : entry.getValue()){
                 if (sp instanceof TexturedObjShader texturedShader) texturedShader.setTexture(0);
+                if (sp instanceof ColoredObjShader coloredObjShader) coloredObjShader.color.set(new Vector3f(1f,1f,1f));
 
                 shaderManager.setUni(Constants.MODEL_MAT_UNI, m.calcRelModelMat());
-                m.getMesh().draw(false);
+                m.getMesh().draw();
             }
         }
 
