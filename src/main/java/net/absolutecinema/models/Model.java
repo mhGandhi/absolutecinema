@@ -3,6 +3,7 @@ package net.absolutecinema.models;
 import net.absolutecinema.AbsoluteCinema;
 import net.absolutecinema.Constants;
 import net.absolutecinema.rendering.RenderException;
+import net.absolutecinema.rendering.Texture;
 import net.absolutecinema.rendering.meshes.ColoredMesh;
 import net.absolutecinema.rendering.meshes.Mesh;
 import net.absolutecinema.rendering.meshes.TexturedMesh;
@@ -18,6 +19,7 @@ import org.joml.Vector3f;
 import org.lwjgl.assimp.*;
 
 import java.io.IOException;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -139,7 +141,6 @@ public class Model {
 
     private static Mesh convertMesh(AIMesh pAIMesh, AIMaterial pMaterial, ShaderProgram pShader, Path pPath) throws Exception {
         AIColor4D color = AIColor4D.create();
-
         AIString matName = AIString.calloc();
         Assimp.aiGetMaterialString(pMaterial, Assimp.AI_MATKEY_NAME, 0, 0, matName);
 
@@ -189,11 +190,34 @@ public class Model {
         }
         ModelShader modelShaderProg = (ModelShader) shaderProgram;//todo except mby?
 
+        Texture texture = AbsoluteCinema.testTexture;
+        {//TEXTURE
+            if (hasTexCoords) {
+                AIString texPath = AIString.calloc();
+                int texFound = Assimp.aiGetMaterialTexture(pMaterial, Assimp.aiTextureType_DIFFUSE, 0, texPath, (IntBuffer) null, null, null, null, null, null);
+                if (texFound == Assimp.aiReturn_SUCCESS) {
+                    Path modelDir = pPath.getParent();
+                    Path resolvedTexPath = modelDir.resolve(texPath.dataString());
+
+                    if (Files.exists(resolvedTexPath)) {
+                        try {
+                            texture = new Texture(resolvedTexPath);
+                            LOGGER.debug("Loaded texture from " + resolvedTexPath);
+                        } catch (Exception e) {
+                            LOGGER.err("Failed to load texture at " + resolvedTexPath + ": " + e.getMessage());
+                        }
+                    } else {
+                        LOGGER.warn("Texture file not found: " + resolvedTexPath);
+                    }
+                }
+            }
+        }
+
         // Load mesh
         //todo
         Mesh convertedMesh;
         if(modelShaderProg instanceof TexturedObjShader tos){
-            convertedMesh = new TexturedMesh(tos, AbsoluteCinema.testTexture);
+            convertedMesh = new TexturedMesh(tos, texture);
         }else if(modelShaderProg instanceof ColoredObjShader cos){
             convertedMesh = new ColoredMesh(cos, new Vector3f(color.r(),color.g(),color.b()));
         } else{

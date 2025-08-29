@@ -175,7 +175,7 @@ public class AbsoluteCinema {
         //setUp objects
         {
             objModels = new LinkedList<>();
-            String[] meshPaths = {"mountains.obj","cube.obj","man.obj","IronMan","livingRoom"};
+            String[] meshPaths = {"mountains.obj","livingRoom"};
             for(String filename : meshPaths){
 
                 System.out.println(" ====== "+filename);
